@@ -1,0 +1,23 @@
+<h1>Listing contratistas</h1>
+
+<table>
+  <tr>
+    <th>Nombre</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @contratistas.each do |contratista| %>
+  <tr>
+    <td><%= contratista.nombre %></td>
+    <td><%= link_to 'Show', contratista %></td>
+    <td><%= link_to 'Edit', edit_contratista_path(contratista) %></td>
+    <td><%= link_to 'Destroy', contratista, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Contratista', new_contratista_path %>

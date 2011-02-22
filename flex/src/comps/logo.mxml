@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Button x="31" y="2" label="Button" width="20" height="20" rotation="45" fillAlphas="[1.0, 1.0]" fillColors="[#F9FCA0, #F6FB6D]" id="button3"/>
+	<mx:Button x="46" y="16" label="Button" width="20" height="20" rotation="45" fillAlphas="[1.0, 1.0]" fillColors="[#FEC75C, #FEC75C]" id="button4"/>
+	<mx:Button x="17" y="17" label="Button" width="20" height="20" rotation="45" fillAlphas="[1.0, 1.0]" fillColors="[#D395FE, #D395FE]" id="button5"/>
+	<mx:Button x="32" y="31" label="Button" width="20" height="20" rotation="45" fillAlphas="[1.0, 1.0]" fillColors="[#FC8E8E, #FC8E8E]" id="button6"/>	
+</mx:Canvas>

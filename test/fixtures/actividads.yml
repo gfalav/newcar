@@ -1,0 +1,15 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  cuenta_id: 1
+  fdesde: 2010-12-30
+  fhasta: 2010-12-30
+  cantidad: 1.5
+  hscar: 1.5
+
+two:
+  cuenta_id: 1
+  fdesde: 2010-12-30
+  fhasta: 2010-12-30
+  cantidad: 1.5
+  hscar: 1.5

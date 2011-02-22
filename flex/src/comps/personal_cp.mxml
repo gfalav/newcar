@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" currentState="index">
+
+	<mx:Script>
+		<![CDATA[
+			import vo.Contratista;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.controls.Alert;
+			import mx.collections.ArrayCollection;
+			import vo.Personal;
+		
+			import Events.ActionEvent;
+			
+			[Bindable] private var personal:Personal;
+			[Bindable] private var personalsarr:ArrayCollection = new ArrayCollection;
+			[Bindable] private var contratistasarr:ArrayCollection = new ArrayCollection;
+			
+			public function finit():void{
+				personalsarr.removeAll();
+				getcontratistas.send();
+				getpersonals.send();
+			}
+			
+			private function fgetpersonals(event:ResultEvent):void{
+				var x:XML = new XML(event.result);
+				personalsarr.removeAll();
+				
+				for each (var o:XML in x.personal){
+					personalsarr.addItem(new Personal(o.@id,
+													 o.@apellido,
+													 o.@nombre,
+													 o.@documento,
+													 o.@telefono,
+													 o.@direccion,
+													 o.@contratista_id,
+													 o.@contratista));
+				}
+				
+			}
+			
+			private function fgetcontratistas(event:ResultEvent):void{
+				var x:XML = new XML(event.result);
+				contratistasarr.removeAll();
+				contratistasarr.addItem(new Contratista(0,'Sel contratista'))
+				for each (var o:XML in x.contratista){
+					contratistasarr.addItem(new Contratista(o.@id,
+															o.@nombre));
+				}
+				
+			}
+
+			private function findex():void{
+				finit();
+				this.currentState = 'index';
+			}
+			
+			private function fshow():void{
+				if (datagrid1.selectedIndex >= 0){
+					personal = personalsarr.getItemAt(datagrid1.selectedIndex) as Personal;
+					this.currentState = 'show';
+				} else {
+					Alert.show('Seleccione una persona de la lista','Atención');
+				}
+			}
+			
+			private function fedit():void{
+				if (datagrid1.selectedIndex >= 0){
+					personal = personalsarr.getItemAt(datagrid1.selectedIndex) as Personal;
+					this.currentState = 'edit';
+				} else {
+					Alert.show('Seleccione una persona de la lista','Atención');
+				}
+			}
+			
+			private function fnew():void{
+				personal = new Personal(0,'','','','','',0,'');
+				contratista_cb.selectedIndex=0;
+				this.currentState = 'new';
+			}
+			
+			private function fsave():void{
+				var o:Object = new Object;
+				if (id_txt.text=='0'){
+					o.id = 0;
+					o.accion = 'Agrega';
+				} else {
+					o.id = id_txt.text;
+					o.accion = 'Edita';
+				}
+				o.apellido = apellido_txt.text;
+				o.nombre = nombre_txt.text;
+				o.documento = documento_txt.text;
+				o.telefono = telefono_txt.text;
+				o.direccion = direccion_txt.text;
+				o.contratista_id = contratistasarr.getItemAt(contratista_cb.selectedIndex).id;
+				personalsarr.removeAll();				
+				addpersonal.send(o);
+				this.currentState = 'index';
+			}
+			
+			private function fdestroy():void{
+				this.currentState = 'index';
+			}
+			
+			private function freturn():void{
+				dispatchEvent(new ActionEvent('Cancela'));	
+			}
+			
+			private function ffault(event:FaultEvent):void{
+				Alert.show(event.fault.faultString,'Error: RPC services Call');
+			}
+		]]>
+	</mx:Script>
+
+	<mx:Metadata>
+	    [Event(name="ActionEvent", type="Events.ActionEvent")]
+	</mx:Metadata>		
+	
+	<mx:states>
+		<mx:State name="index">
+			<mx:RemoveChild target="{form1}"/>
+			<mx:RemoveChild target="{btindex}"/>
+			<mx:RemoveChild target="{btsave}"/>
+		</mx:State>
+		<mx:State name="new">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btshow}"/>
+			<mx:RemoveChild target="{btedit}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:SetStyle target="{apellido_txt}" name="backgroundColor" value="#FCFED2"/>
+			<mx:SetStyle target="{nombre_txt}" name="backgroundColor" value="#FCFED2"/>
+			<mx:SetStyle target="{documento_txt}" name="backgroundColor" value="#FCFED2"/>
+			<mx:SetStyle target="{telefono_txt}" name="backgroundColor" value="#FCFED2"/>
+			<mx:SetStyle target="{direccion_txt}" name="backgroundColor" value="#FCFED2"/>
+			<mx:RemoveChild target="{contratista_txt}"/>
+		</mx:State>
+		<mx:State name="show">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btshow}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:RemoveChild target="{btsave}"/>
+			<mx:SetProperty target="{apellido_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{nombre_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{documento_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{telefono_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{direccion_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{contratista_txt}" name="editable" value="false"/>
+			<mx:RemoveChild target="{contratista_cb}"/>
+		</mx:State>
+		<mx:State name="edit">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btedit}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:RemoveChild target="{contratista_txt}"/>
+			<mx:SetStyle target="{apellido_txt}" name="backgroundColor" value="#FCFED2"/>
+			<mx:SetStyle target="{nombre_txt}" name="backgroundColor" value="#FCFED2"/>
+			<mx:SetStyle target="{documento_txt}" name="backgroundColor" value="#FCFED2"/>
+			<mx:SetStyle target="{telefono_txt}" name="backgroundColor" value="#FCFED2"/>
+			<mx:SetStyle target="{direccion_txt}" name="backgroundColor" value="#FCFED2"/>
+		</mx:State>
+	</mx:states>
+	
+	<mx:transitions>
+        <mx:Transition id="myTransition" fromState="*" toState="*">
+            <mx:Parallel id="t1" targets="{[form1,datagrid1,btindex,btnew,btshow,btedit,btdestroy,btsave,btreturn,id_txt,apellido_txt,nombre_txt,documento_txt,direccion_txt,telefono_txt,contratista_txt,contratista_cb]}">
+                <!-- Define a Move and Resize effect.-->
+                <mx:Move  duration="800"/>
+                <mx:Resize duration="800"/>
+				<mx:Fade id="fadeIn" duration="800" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Parallel>
+        </mx:Transition>
+    </mx:transitions>
+	
+	<mx:VBox>
+		<mx:DataGrid height="400" id="datagrid1" dataProvider="{personalsarr}">
+			<mx:columns>
+				<mx:DataGridColumn headerText="Id" dataField="id" width="50"/>
+				<mx:DataGridColumn headerText="Apellido" dataField="apellido" width="120"/>
+				<mx:DataGridColumn headerText="Nombre" dataField="nombre" width="200"/>
+				<mx:DataGridColumn headerText="Documento" dataField="documento" width="100"/>
+				<mx:DataGridColumn headerText="Telefonos" dataField="telefono" width="120"/>
+				<mx:DataGridColumn headerText="Contratista" dataField="contratista" width="110"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:Form id="form1">
+			<mx:FormHeading label="Personal"/>
+			<mx:FormItem label="Id">
+				<mx:TextInput id="id_txt" text="{personal.id}" width="60" editable="false"/>
+			</mx:FormItem>
+			<mx:FormItem label="Apellido">
+				<mx:TextInput id="apellido_txt" text="{personal.apellido}" width="300"/>
+			</mx:FormItem>
+			<mx:FormItem label="Nombre">
+				<mx:TextInput id="nombre_txt" text="{personal.nombre}" width="300"/>
+			</mx:FormItem>
+			<mx:FormItem label="Documento">
+				<mx:TextInput id="documento_txt" text="{personal.documento}" width="100"/>
+			</mx:FormItem>
+			<mx:FormItem label="Teléfonos">
+				<mx:TextInput id="telefono_txt" text="{personal.telefono}" width="100"/>
+			</mx:FormItem>
+			<mx:FormItem label="Dirección">
+				<mx:TextInput id="direccion_txt" text="{personal.direccion}" width="300"/>
+			</mx:FormItem>
+			<mx:FormItem label="Contratista">
+				<mx:TextInput id="contratista_txt" text="{personal.contratista}" width="100" />
+				<mx:ComboBox id="contratista_cb" dataProvider="{contratistasarr}" labelField="nombre" width="150"/>
+			</mx:FormItem>
+		</mx:Form>
+		<mx:HBox>
+			<mx:Button id="btnew"     click="fnew()" label="Nuevo" icon="@Embed(source='../../icons/new.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btshow"    click="fshow()" label="Ver" icon="@Embed(source='../../icons/Search.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btedit"    click="fedit()" label="Edita" icon="@Embed(source='../../icons/Edit.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btdestroy" click="fdestroy()" label="Borra" icon="@Embed(source='../../icons/Delete.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btsave"    click="fsave()" label="Salva" icon="@Embed(source='../../icons/Save.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btindex"   click="findex()" label="Lista" icon="@Embed(source='../../icons/show.png')" labelPlacement="bottom" width="70" height="48"/>				
+			<mx:Button id="btreturn"  click="freturn()" label="Cierra" icon="@Embed(source='../../icons/minimize.png')" labelPlacement="bottom" width="70" height="48"/>				
+		</mx:HBox>
+	</mx:VBox>
+
+	<mx:HTTPService id="getpersonals" url="../personals.xml" method="GET" resultFormat="xml" result="fgetpersonals(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="getcontratistas" url="../contratistas.xml" method="GET" resultFormat="xml" result="fgetcontratistas(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="addpersonal" url="../personals/addpersonal.xml" method="GET" resultFormat="xml" result="fgetpersonals(event)" fault="ffault(event)" showBusyCursor="true"/>	
+	
+</mx:Canvas>

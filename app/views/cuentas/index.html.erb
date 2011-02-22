@@ -1,0 +1,25 @@
+<h1>Listing cuentas</h1>
+
+<table>
+  <tr>
+    <th>Nombre</th>
+    <th>Ancestry</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @cuentas.each do |cuenta| %>
+  <tr>
+    <td><%= cuenta.nombre %></td>
+    <td><%= cuenta.ancestry %></td>
+    <td><%= link_to 'Show', cuenta %></td>
+    <td><%= link_to 'Edit', edit_cuenta_path(cuenta) %></td>
+    <td><%= link_to 'Destroy', cuenta, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Cuenta', new_cuenta_path %>

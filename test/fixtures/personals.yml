@@ -1,0 +1,17 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  apellido: MyString
+  nombre: MyString
+  documento: MyString
+  telefono: MyString
+  direccion: MyString
+  contratista_id: 1
+
+two:
+  apellido: MyString
+  nombre: MyString
+  documento: MyString
+  telefono: MyString
+  direccion: MyString
+  contratista_id: 1

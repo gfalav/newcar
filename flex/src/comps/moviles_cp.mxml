@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" currentState="index">
+
+	<mx:Script>
+		<![CDATA[
+
+			import Events.ActionEvent;
+			
+			private function findex():void{
+				this.currentState = 'index';
+			}
+			private function fshow():void{
+				this.currentState = 'show';
+			}
+			private function fedit():void{
+				this.currentState = 'edit';
+			}
+			private function fnew():void{
+				this.currentState = 'new';
+			}
+			private function fsave():void{
+				this.currentState = 'index';
+			}
+			private function fdestroy():void{
+				this.currentState = 'index';
+			}
+			private function freturn():void{
+				dispatchEvent(new ActionEvent('Cancela'));	
+			}
+			
+		]]>
+	</mx:Script>
+
+	<mx:Metadata>
+	    [Event(name="ActionEvent", type="Events.ActionEvent")]
+	</mx:Metadata>	
+	
+	<mx:states>
+		<mx:State name="index">
+			<mx:RemoveChild target="{btindex}"/>
+			<mx:RemoveChild target="{btsave}"/>
+			<mx:RemoveChild target="{hbox1}"/>
+		</mx:State>
+		<mx:State name="new">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btshow}"/>
+			<mx:RemoveChild target="{btedit}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+		</mx:State>
+		<mx:State name="show">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btshow}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:RemoveChild target="{btsave}"/>
+			<mx:RemoveChild target="{datagrid2}"/>
+			<mx:RemoveChild target="{datagrid3}"/>
+		</mx:State>
+		<mx:State name="edit">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btedit}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:SetProperty target="{list1}" name="width" value="241"/>
+			<mx:SetProperty target="{textinput1}" name="width" value="241"/>
+		</mx:State>
+	</mx:states>
+	
+	<mx:transitions>
+        <mx:Transition id="myTransition" fromState="*" toState="*">
+            <mx:Parallel id="t1" targets="{[hbox1,datagrid1,btindex,btnew,btshow,btedit,btdestroy,btsave,btreturn,datagrid2,datagrid3,textinput1]}">
+                <!-- Define a Move and Resize effect.-->
+                <mx:Move  duration="800"/>
+                <mx:Resize duration="800"/>
+				<mx:Fade id="fadeIn" duration="800" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Parallel>
+        </mx:Transition>
+    </mx:transitions>
+	
+	<mx:VBox>
+		<mx:DataGrid height="400" id="datagrid1">
+			<mx:columns>
+				<mx:DataGridColumn headerText="Id" dataField="col1" width="50"/>
+				<mx:DataGridColumn headerText="Móvil" dataField="col2" width="300"/>
+				<mx:DataGridColumn headerText="Of Car" dataField="col2" width="200"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:HBox id="hbox1">			
+			<mx:Form id="form1">
+				<mx:FormHeading label="Móviles"/>
+				<mx:FormItem label="Id">
+					<mx:TextInput width="60"/>
+				</mx:FormItem>
+				<mx:FormItem label="Movil">
+					<mx:TextInput width="300"/>
+				</mx:FormItem>
+				<mx:FormItem label="Of Car">
+					<mx:TextInput width="300"/>
+				</mx:FormItem>
+				<mx:FormItem label="Vehículo">
+					<mx:TextInput id="textinput1"/>
+				</mx:FormItem>
+				<mx:FormItem label="Personal">
+					<mx:List height="60" id="list1"></mx:List>
+				</mx:FormItem>
+			</mx:Form>
+			<mx:DataGrid height="229" id="datagrid2">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Personal Disp" dataField="col1" width="150"/>
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:DataGrid height="229" id="datagrid3">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Vehículo Disp" dataField="col1" width="150"/>
+				</mx:columns>
+			</mx:DataGrid>
+		</mx:HBox>
+		<mx:HBox>
+			<mx:Button id="btnew"     click="fnew()" label="Nuevo" icon="@Embed(source='../../icons/new.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btshow"    click="fshow()" label="Ver" icon="@Embed(source='../../icons/Search.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btedit"    click="fedit()" label="Edita" icon="@Embed(source='../../icons/Edit.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btdestroy" click="fdestroy()" label="Borra" icon="@Embed(source='../../icons/Delete.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btsave"    click="fsave()" label="Salva" icon="@Embed(source='../../icons/Save.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btindex"   click="findex()" label="Lista" icon="@Embed(source='../../icons/show.png')" labelPlacement="bottom" width="70" height="48"/>				
+			<mx:Button id="btreturn"  click="freturn()" label="Cierra" icon="@Embed(source='../../icons/minimize.png')" labelPlacement="bottom" width="70" height="48"/>				
+		</mx:HBox>
+	</mx:VBox>
+	
+	
+</mx:Canvas>

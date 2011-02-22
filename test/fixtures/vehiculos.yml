@@ -1,0 +1,15 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  patente: MyString
+  marca: MyString
+  modelo: MyString
+  afabric: 1
+  tvehiculo_id: 1
+
+two:
+  patente: MyString
+  marca: MyString
+  modelo: MyString
+  afabric: 1
+  tvehiculo_id: 1

@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Apellido:</b>
+  <%= @personal.apellido %>
+</p>
+
+<p>
+  <b>Nombre:</b>
+  <%= @personal.nombre %>
+</p>
+
+<p>
+  <b>Documento:</b>
+  <%= @personal.documento %>
+</p>
+
+<p>
+  <b>Telefono:</b>
+  <%= @personal.telefono %>
+</p>
+
+<p>
+  <b>Direccion:</b>
+  <%= @personal.direccion %>
+</p>
+
+<p>
+  <b>Contratista:</b>
+  <%= @personal.contratista_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_personal_path(@personal) %> |
+<%= link_to 'Back', personals_path %>

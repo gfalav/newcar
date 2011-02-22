@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" currentState="index">
+
+	<mx:Script>
+		<![CDATA[
+			import vo.Tvehiculo;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.collections.ArrayCollection;
+			import vo.Vehiculo;
+			import mx.controls.Alert;
+
+			import Events.ActionEvent;
+			
+			[Bindable] private var vehiculo:Vehiculo;
+			[Bindable] private var vehiculosarr:ArrayCollection = new ArrayCollection;
+			[Bindable] private var tvehiculosarr:ArrayCollection = new ArrayCollection;
+			
+			public function finit():void{
+				vehiculosarr.removeAll();
+				getvehiculos.send();
+				gettvehiculos.send();
+			} 
+			
+			private function fgetvehiculos(event:ResultEvent):void{
+				var x:XML = new XML(event.result);
+				vehiculosarr.removeAll();
+				
+				for each (var o:XML in x.vehiculo){
+					vehiculosarr.addItem(new Vehiculo(o.@id,
+													  o.@patente,
+													  o.@marca,
+													  o.@modelo,
+													  o.@afabric,
+													  o.@tvehiculo_id,
+													  o.@tvehiculo));
+				}
+				
+			}
+			
+			private function fgettvehiculos(event:ResultEvent):void{
+				var x:XML = new XML(event.result);
+				tvehiculosarr.removeAll();
+				tvehiculosarr.addItem(new Tvehiculo(0,'Sel tipo'));
+				for each (var o:XML in x.tvehiculo){
+					tvehiculosarr.addItem(new Tvehiculo(o.@id,o.@tipo));
+				}
+				
+			}
+			
+			private function findex():void{
+				finit();
+				this.currentState = 'index';
+			}
+			private function fshow():void{
+				if (datagrid1.selectedIndex >= 0){
+					vehiculo = vehiculosarr.getItemAt(datagrid1.selectedIndex) as Vehiculo;
+					this.currentState = 'show';
+				} else {
+					Alert.show('Seleccione un vehículo de la lista','Atención');
+				}
+			}
+			private function fedit():void{
+				if (datagrid1.selectedIndex >= 0){
+					vehiculo = vehiculosarr.getItemAt(datagrid1.selectedIndex) as Vehiculo;
+					this.currentState = 'edit';
+				} else {
+					Alert.show('Seleccione un vehículo de la lista','Atención');
+				}
+			}
+			private function fnew():void{
+				vehiculo = new Vehiculo(0,'','','',0,0,'');
+				tvehiculo_cb.selectedIndex=0;
+				this.currentState = 'new';
+			}
+			private function fsave():void{
+				var o:Object = new Object;
+				if (id_txt.text=='0'){
+					o.id = 0;
+					o.accion = 'Agrega';
+				} else {
+					o.id = id_txt.text;
+					o.accion = 'Edita';
+				}
+				o.patente = patente_txt.text;
+				o.marca = marca_txt.text;
+				o.modelo = modelo_txt.text;
+				o.afabric = afabric_txt.text;
+				o.tvehiculo_id = tvehiculosarr.getItemAt(tvehiculo_cb.selectedIndex).id;
+				vehiculosarr.removeAll();				
+				addvehiculo.send(o);
+				this.currentState = 'index';
+			}
+			private function fdestroy():void{
+				this.currentState = 'index';
+			}
+			private function freturn():void{
+				dispatchEvent(new ActionEvent('Cancela'));	
+			}
+			
+			private function ffault(event:FaultEvent):void{
+				Alert.show(event.fault.faultString,'Error: RPC services Call');
+			}
+		]]>
+	</mx:Script>
+
+	<mx:Metadata>
+	    [Event(name="ActionEvent", type="Events.ActionEvent")]
+	</mx:Metadata>	
+	
+	
+	<mx:states>
+		<mx:State name="index">
+			<mx:RemoveChild target="{form1}"/>
+			<mx:RemoveChild target="{btindex}"/>
+			<mx:RemoveChild target="{btsave}"/>
+		</mx:State>
+		<mx:State name="new">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btshow}"/>
+			<mx:RemoveChild target="{btedit}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:RemoveChild target="{tvehiculo_txt}"/>
+			<mx:SetStyle target="{patente_txt}" name="backgroundColor" value="#FAFDC9"/>
+			<mx:SetStyle target="{marca_txt}" name="backgroundColor" value="#FAFDC9"/>
+			<mx:SetStyle target="{modelo_txt}" name="backgroundColor" value="#FAFDC9"/>
+			<mx:SetStyle target="{afabric_txt}" name="backgroundColor" value="#FAFDC9"/>
+		</mx:State>
+		<mx:State name="show">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btshow}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:RemoveChild target="{btsave}"/>
+			<mx:RemoveChild target="{tvehiculo_cb}"/>
+			<mx:SetProperty target="{patente_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{marca_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{modelo_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{afabric_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{tvehiculo_txt}" name="editable" value="false"/>
+		</mx:State>
+		<mx:State name="edit">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btedit}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:RemoveChild target="{tvehiculo_txt}"/>
+			<mx:SetStyle target="{patente_txt}" name="backgroundColor" value="#FAFDC9"/>
+			<mx:SetStyle target="{marca_txt}" name="backgroundColor" value="#FAFDC9"/>
+			<mx:SetStyle target="{modelo_txt}" name="backgroundColor" value="#FAFDC9"/>
+			<mx:SetStyle target="{afabric_txt}" name="backgroundColor" value="#FAFDC9"/>
+		</mx:State>
+	</mx:states>
+	
+	<mx:transitions>
+        <mx:Transition id="myTransition" fromState="*" toState="*">
+            <mx:Parallel id="t1" targets="{[form1,datagrid1,btindex,btnew,btshow,btedit,btdestroy,btsave,btreturn,id_txt,patente_txt,marca_txt,modelo_txt,afabric_txt,tvehiculo_txt,tvehiculo_cb]}">
+                <!-- Define a Move and Resize effect.-->
+                <mx:Move  duration="800"/>
+                <mx:Resize duration="800"/>
+				<mx:Fade id="fadeIn" duration="800" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Parallel>
+        </mx:Transition>
+    </mx:transitions>
+	
+	<mx:VBox>
+		<mx:DataGrid height="400" id="datagrid1" dataProvider="{vehiculosarr}">
+			<mx:columns>
+				<mx:DataGridColumn headerText="Id" dataField="id" width="50"/>
+				<mx:DataGridColumn headerText="Patente" dataField="patente" width="100"/>
+				<mx:DataGridColumn headerText="Marca" dataField="marca" width="100"/>
+				<mx:DataGridColumn headerText="Modelo" dataField="modelo" width="90"/>
+				<mx:DataGridColumn headerText="A Fabricación" dataField="afabric" width="90"/>
+				<mx:DataGridColumn headerText="T Vehículo" dataField="tvehiculo" width="90"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:Form id="form1">
+			<mx:FormHeading label="Vehículos"/>
+			<mx:FormItem label="Id">
+				<mx:TextInput id="id_txt" text="{vehiculo.id}" width="60" editable="false"/>
+			</mx:FormItem>
+			<mx:FormItem label="Patente">
+				<mx:TextInput id="patente_txt" text="{vehiculo.patente}" width="60"/>
+			</mx:FormItem>
+			<mx:FormItem label="Marca">
+				<mx:TextInput id="marca_txt" text="{vehiculo.marca}" width="300"/>
+			</mx:FormItem>
+			<mx:FormItem label="Modelo">
+				<mx:TextInput id="modelo_txt" text="{vehiculo.modelo}" width="300"/>
+			</mx:FormItem>
+			<mx:FormItem label="A Fabricación">
+				<mx:TextInput id="afabric_txt" text="{vehiculo.afabric}" width="60"/>
+			</mx:FormItem>
+			<mx:FormItem label="T Vehículo">
+				<mx:TextInput id="tvehiculo_txt" text="{vehiculo.tvehiculo}" width="300" />
+				<mx:ComboBox id="tvehiculo_cb" dataProvider="{tvehiculosarr}" labelField="tipo" width="300"/>
+			</mx:FormItem>
+		</mx:Form>
+		<mx:HBox>
+			<mx:Button id="btnew"     click="fnew()" label="Nuevo" icon="@Embed(source='../../icons/new.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btshow"    click="fshow()" label="Ver" icon="@Embed(source='../../icons/Search.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btedit"    click="fedit()" label="Edita" icon="@Embed(source='../../icons/Edit.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btdestroy" click="fdestroy()" label="Borra" icon="@Embed(source='../../icons/Delete.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btsave"    click="fsave()" label="Salva" icon="@Embed(source='../../icons/Save.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btindex"   click="findex()" label="Lista" icon="@Embed(source='../../icons/show.png')" labelPlacement="bottom" width="70" height="48"/>				
+			<mx:Button id="btreturn"  click="freturn()" label="Cierra" icon="@Embed(source='../../icons/minimize.png')" labelPlacement="bottom" width="70" height="48"/>				
+		</mx:HBox>
+	</mx:VBox>
+	
+	<mx:HTTPService id="getvehiculos" url="../vehiculos.xml" method="GET" resultFormat="xml" result="fgetvehiculos(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="gettvehiculos" url="../tvehiculos.xml" method="GET" resultFormat="xml" result="fgettvehiculos(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="addvehiculo" url="../vehiculos/addvehiculo.xml" method="GET" resultFormat="xml" result="fgetvehiculos(event)" fault="ffault(event)" showBusyCursor="true"/>	
+	
+</mx:Canvas>

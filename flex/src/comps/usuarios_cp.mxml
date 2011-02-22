@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300" currentState="login">
+	<mx:states>
+		<mx:State name="login">
+			<mx:RemoveChild target="{formitem1}"/>
+			<mx:RemoveChild target="{formitem2}"/>
+			<mx:RemoveChild target="{formheading1}"/>
+		</mx:State>
+		<mx:State name="pwvencida">
+			<mx:RemoveChild target="{button1}"/>
+			<mx:SetStyle target="{form1}" name="borderStyle" value="solid"/>
+			<mx:SetStyle target="{form1}" name="borderColor" value="#000000"/>
+		</mx:State>
+		<mx:State name="logeado" basedOn="login">
+			<mx:RemoveChild target="{formitem4}"/>
+		</mx:State>
+	</mx:states>
+
+	<mx:Script>
+		<![CDATA[
+			import Events.LoginEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.controls.DateField;
+			import mx.controls.Alert;
+			import vo.MD5;
+			import vo.Usuario;
+			
+			private var usuario:Usuario;
+			
+			private function flogin():void{
+				var u:Usuario = new Usuario(0,usuario_txt.text,MD5.encrypt(password_txt.text),'','',new Date);
+				user_h.send(u);
+			}
+			
+			private function floginres(event:ResultEvent):void{
+				usuario = new Usuario(event.result.usuarios.usuario.id.value,
+									  event.result.usuarios.usuario.usuario,
+									  event.result.usuarios.usuario.password,
+									  event.result.usuarios.usuario.nombre,
+									  event.result.usuarios.usuario.perfil,
+									  DateField.stringToDate(event.result.usuarios.usuario.fvctopass,'YYYY-MM-DD'));									   
+				if (usuario.id !=0) {
+					if (usuario.fvctopass < new Date()){
+						this.currentState = 'pwvencida';
+					} else {
+					this.currentState='logeado';
+					usuario_txt.text = usuario.nombre;
+					dispatchEvent(new LoginEvent("ok"));
+					}
+				} else {
+					Alert.show('Usuario no habilitado','Error');
+				}				
+			}
+
+			public function factpwd():void{
+				if (npwd1.text == npwd2.text){
+					usuario.password = MD5.encrypt(npwd1.text);
+					actpwd_h.send(usuario);
+				} else {
+					Alert.show('No coinciden las contraseñas','Error');
+				}
+			}
+			
+			private function ffault(event:FaultEvent):void{
+				Alert.show(event.fault.faultDetail,'Error: RPC services Call');
+			}
+
+		]]>
+	</mx:Script>
+	
+	<mx:Form backgroundColor="#FFFEFE" id="form1">
+		<mx:FormHeading label="Ingrese nueva contraseña..." id="formheading1"/>
+		<mx:FormItem label="Usuario">
+			<mx:TextInput width="120" id="usuario_txt"/>
+		</mx:FormItem>
+		<mx:FormItem label="Password" direction="horizontal" id="formitem4">
+			<mx:TextInput displayAsPassword="true" id="password_txt" width="120" enter="flogin()"/>
+			<mx:Button label="->" id="button1" click="flogin()"/>
+		</mx:FormItem>
+		<mx:FormItem label="Nueva Password" id="formitem1">
+			<mx:TextInput id="npwd1" width="120" displayAsPassword="true"/>
+		</mx:FormItem>
+		<mx:FormItem label="Confirma" id="formitem2" direction="horizontal">
+			<mx:TextInput id="npwd2" width="120" displayAsPassword="true" enter="factpwd()"/>
+			<mx:Button label="-&gt;" id="button2" click="factpwd()"/>
+		</mx:FormItem>
+	</mx:Form>
+
+	<mx:HTTPService id="user_h" method="GET" url="../usuarios/find.xml" result="floginres(event)" fault="ffault(event)" showBusyCursor="true" />
+	<mx:HTTPService id="actpwd_h" method="GET" url="../usuarios/actpwd.xml" result="floginres(event)" fault="ffault(event)" showBusyCursor="true" />
+
+	<mx:transitions>
+        <mx:Transition id="myTransition" fromState="*" toState="*">
+            <mx:Parallel id="t1" targets="{[formitem1,formitem2,formitem4,formheading1,form1,button1]}">
+                <!-- Define a Move and Resize effect.-->
+                <mx:Move  duration="500"/>
+                <mx:Resize duration="500"/>
+				<mx:Fade id="fadeIn" duration="500" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Parallel>
+        </mx:Transition>
+    </mx:transitions>
+
+	<mx:Metadata>
+	    [Event(name="LoginEvent", type="Events.LoginEvent")]
+	</mx:Metadata>
+	
+</mx:Canvas>

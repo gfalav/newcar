@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Patente:</b>
+  <%= @vehiculo.patente %>
+</p>
+
+<p>
+  <b>Marca:</b>
+  <%= @vehiculo.marca %>
+</p>
+
+<p>
+  <b>Modelo:</b>
+  <%= @vehiculo.modelo %>
+</p>
+
+<p>
+  <b>Afabric:</b>
+  <%= @vehiculo.afabric %>
+</p>
+
+<p>
+  <b>Tvehiculo:</b>
+  <%= @vehiculo.tvehiculo_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_vehiculo_path(@vehiculo) %> |
+<%= link_to 'Back', vehiculos_path %>

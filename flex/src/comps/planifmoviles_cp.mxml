@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" minHeight="500" 
+	xmlns:ns1="comps.*" currentState="inicial" 
+	horizontalScrollPolicy="off" verticalScrollPolicy="off" creationComplete="finit()">
+
+	<mx:states>
+		<mx:State name="inicial">
+			<mx:RemoveChild target="{personal_cp1}"/>
+			<mx:RemoveChild target="{vehiculos_cp1}"/>
+			<mx:RemoveChild target="{moviles_cp1}"/>
+			<mx:SetProperty target="{button2}" name="height" value="30"/>
+			<mx:SetProperty target="{button1}" name="height" value="30"/>
+			<mx:SetProperty target="{button3}" name="height" value="30"/>
+			<mx:SetProperty target="{button1}" name="width" value="110"/>
+			<mx:SetProperty target="{button2}" name="width" value="110"/>
+			<mx:SetProperty target="{button3}" name="width" value="110"/>
+		</mx:State>
+		<mx:State name="mantvehiculos">
+			<mx:RemoveChild target="{adg1}"/>
+			<mx:RemoveChild target="{hbox2}"/>
+			<mx:RemoveChild target="{personal_cp1}"/>
+			<mx:RemoveChild target="{moviles_cp1}"/>
+		</mx:State>
+		<mx:State name="mantpersonal">
+			<mx:RemoveChild target="{vehiculos_cp1}"/>
+			<mx:RemoveChild target="{moviles_cp1}"/>
+			<mx:RemoveChild target="{hbox2}"/>
+			<mx:RemoveChild target="{adg1}"/>
+		</mx:State>
+		<mx:State name="mantmoviles">
+			<mx:RemoveChild target="{vehiculos_cp1}"/>
+			<mx:RemoveChild target="{personal_cp1}"/>
+			<mx:RemoveChild target="{hbox2}"/>
+			<mx:RemoveChild target="{adg1}"/>
+		</mx:State>
+	</mx:states>
+
+	<mx:Script>
+		<![CDATA[
+			import Events.ActionEvent;
+			import mx.collections.ArrayCollection;
+			
+			public function finit():void{
+				vistaanual();
+			}
+
+			private function fpershow():void{
+				switch(periodo_cb.selectedItem){
+					case 'Anual':
+						vistaanual();
+						break;
+					case 'Mensual':
+						vistamensual()
+						break;
+					case 'Diario':
+						break;
+				}
+			}
+
+			
+			private function fmantpersonal():void{
+				personal_cp1.finit();
+				this.currentState='mantpersonal';
+			}
+
+			private function fmantvehiculos():void{
+				vehiculos_cp1.finit();
+				this.currentState='mantvehiculos';
+			}
+
+			private function fmantmoviles():void{
+				this.currentState='mantmoviles';
+			}
+
+			private function faction(event:ActionEvent):void{
+				if (event.accion =='Cancela'){
+					this.currentState = 'inicial';
+				}
+			}
+			
+			private function vistaanual():void{
+				var arrcols:ArrayCollection = new ArrayCollection;
+				var n:Number;
+				var dgcab:AdvancedDataGridColumn = new AdvancedDataGridColumn;
+				dgcab.headerText = 'Cuentas';
+				dgcab.dataField = '@cuenta';
+				dgcab.width = 250;
+				arrcols.addItem(dgcab);
+				dgcab = new AdvancedDataGridColumn;
+				dgcab.headerText = 'Total';
+				dgcab.dataField = '@hscar';
+				dgcab.formatter = nf;
+				dgcab.width = 80;
+				arrcols.addItem(dgcab);
+				for (n=1; n<13; n++){
+					var dg:AdvancedDataGridColumn = new AdvancedDataGridColumn;
+					dg.headerText = n.toString();
+					dg.dataField = "@m"+n.toString();
+					dg.formatter = nf;
+					dg.width=60;
+					arrcols.addItemAt(dg,n);
+				}
+				adg1.columns = arrcols.toArray();
+			}
+			
+			private function vistamensual():void{
+				var arrcols:ArrayCollection = new ArrayCollection;
+				var n:Number;
+				var dgcab:AdvancedDataGridColumn = new AdvancedDataGridColumn;
+				dgcab.headerText = 'Cuentas';
+				dgcab.dataField = '@cuenta';
+				dgcab.width = 250;
+				arrcols.addItem(dgcab);
+				dgcab = new AdvancedDataGridColumn;
+				dgcab.headerText = 'Total';
+				dgcab.dataField = '@hscar';
+				dgcab.formatter = nf;
+				dgcab.width = 80;
+				arrcols.addItem(dgcab);
+				for (n=1; n<32; n++){
+					var dg:AdvancedDataGridColumn = new AdvancedDataGridColumn;
+					dg.headerText = n.toString();
+					dg.dataField = "@m"+n.toString();
+					dg.formatter = nf;
+					dg.width=50;
+					arrcols.addItemAt(dg,n);
+				}
+				adg1.columns = arrcols.toArray();
+			}
+			
+		]]>
+	</mx:Script>		
+	
+	
+	<mx:VBox width="100%" height="100%" maxWidth="1150" horizontalScrollPolicy="off" verticalScrollPolicy="off">				
+		<ns1:personal_cp id="personal_cp1" ActionEvent="faction(event)" />
+		<ns1:vehiculos_cp id="vehiculos_cp1" ActionEvent="faction(event)" />
+		<ns1:moviles_cp id="moviles_cp1" ActionEvent="faction(event)" />
+		<mx:HBox verticalAlign="middle" id="hbox2">
+			<mx:Label text="Planificación de móviles     "  fontWeight="bold" fontSize="22"/>			
+			<mx:Form borderStyle="solid" cornerRadius="15">
+				<mx:FormItem label="Periodo de Programación" direction="horizontal" fontWeight="bold">
+					<mx:ComboBox id="periodo_cb" change="fpershow()" width="100">
+						<mx:ArrayCollection>
+							<mx:String>Anual</mx:String>
+							<mx:String>Mensual</mx:String>
+						</mx:ArrayCollection>
+					</mx:ComboBox>
+					<mx:NumericStepper id="anio_ns" change="fpershow()" value="2011" minimum="2011" maximum="2050" stepSize="1"/>
+					<mx:NumericStepper id="mes_ns" change="fpershow()" value="2" minimum="1" maximum="12" stepSize="1"/>
+				</mx:FormItem>
+			</mx:Form>
+			<mx:Button label="Personal" click="fmantpersonal()" id="button1" icon="@Embed(source='../../icons/people.png')" width="120"/>
+			<mx:Button label="Vehículos" click="fmantvehiculos()" id="button2" icon="@Embed(source='../../icons/truck.png')" width="120"/>
+			<mx:Button label="Móviles" click="fmantmoviles()" id="button3" icon="@Embed(source='../../icons/movil.png')" width="120"/>
+		</mx:HBox>
+		<mx:AdvancedDataGrid id="adg1" width="100%" height="100%" maxWidth="1280" selectionMode="singleCell" editable="false" horizontalScrollPolicy="on" verticalScrollPolicy="on">	
+	        <mx:columns>
+	            <mx:AdvancedDataGridColumn id="cuentas" dataField="" headerText="Cuenta" width="250"/>
+	            <mx:AdvancedDataGridColumn id="total" dataField="" headerText="Total" width="80"/>
+	        </mx:columns>
+	    </mx:AdvancedDataGrid>
+	</mx:VBox>	
+
+	<mx:transitions>
+        <mx:Transition id="myTransition" fromState="*" toState="*">
+            <mx:Parallel id="t1" targets="{[adg1]}">
+                <!-- Define a Move and Resize effect.-->
+                <mx:Move  duration="800"/>
+                <mx:Resize duration="800"/>
+				<mx:Fade id="fadeIn" duration="800" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Parallel>
+        </mx:Transition>
+    </mx:transitions>
+	<mx:NumberFormatter id="nf" precision="2" useThousandsSeparator="true" />
+    
+</mx:Canvas>

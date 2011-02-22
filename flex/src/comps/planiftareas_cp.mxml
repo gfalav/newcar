@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ns1="comps.*" width="100%" height="100%"
+	currentState="inicial" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+
+	<mx:states>
+		<mx:State name="inicial">
+			<mx:RemoveChild target="{cuentas_cp1}"/>
+			<mx:RemoveChild target="{actividades_cp1}"/>
+		</mx:State>
+		<mx:State name="mantcuentas">
+			<mx:RemoveChild target="{adg1}"/>
+			<mx:RemoveChild target="{hbox2}"/>
+			<mx:RemoveChild target="{actividades_cp1}"/>
+		</mx:State>
+		<mx:State name="mantactividades">
+			<mx:RemoveChild target="{cuentas_cp1}"/>
+			<mx:RemoveChild target="{hbox2}"/>
+			<mx:RemoveChild target="{adg1}"/>
+		</mx:State>
+	</mx:states>
+
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.HierarchicalData;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import vo.Cuenta;
+			import mx.collections.ArrayCollection;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import Events.ActionEvent;
+			import mx.events.ListEvent;
+			import mx.controls.Alert;
+			
+			private var listaxml:XMLList = new XMLList;
+			[Bindable] private var jerarquia:HierarchicalData = new HierarchicalData;
+			private var cuentasel:Cuenta = new Cuenta(-1,'','');
+			
+			private function fgetactividads(event:ResultEvent):void{
+				listaxml = new XMLList(event.result);
+				jerarquia = new HierarchicalData(listaxml);
+			}
+			
+			public function finit():void{
+				vistaanual();
+				var o:Object = new Object;
+				o.anio = anio_ns.value;
+				o.mes = mes_ns.value;
+				getactividadsmes.send(o);
+			}
+
+			private function fpershow():void{
+				var o:Object = new Object;
+				switch(periodo_cb.selectedItem){
+					case 'Anual':
+						o.anio = anio_ns.value;
+						o.mes = mes_ns.value;
+						getactividadsmes.send(o);
+						jerarquia = new HierarchicalData;
+						vistaanual();
+						break;
+					case 'Mensual':
+						o.anio = anio_ns.value;
+						o.mes = mes_ns.value;
+						getactividadsdia.send(o);
+						jerarquia = new HierarchicalData;
+						vistamensual();
+						break;
+				}
+			}
+			
+			private function fmantcuenta():void{
+				cuentas_cp1.init();
+				this.currentState='mantcuentas';
+			}
+
+			private function fmantactividad():void{
+				if (cuentasel.id > 1) {
+					actividades_cp1.setcuenta(cuentasel);
+					this.currentState='mantactividades';
+				} else {
+					Alert.show('Seleccione una cuenta','Atención');
+				}
+			}
+
+			private function fselcel(event:ListEvent):void{
+				cuentasel = new Cuenta(event.itemRenderer.data.@id,
+									   event.itemRenderer.data.@nombre,
+									   event.itemRenderer.data.@ancestry);
+			}
+			
+			private function faction(event:ActionEvent):void{
+				if (event.accion =='Cancela'){
+					cuentasel = new Cuenta(-1,'','');
+					jerarquia = new HierarchicalData;
+					finit();
+					this.currentState = 'inicial';
+				}
+			}
+			
+			private function vistaanual():void{
+				var arrcols:ArrayCollection = new ArrayCollection;
+				var n:Number;
+				var dgcab:AdvancedDataGridColumn = new AdvancedDataGridColumn;
+				dgcab.headerText = 'Cuentas';
+				dgcab.dataField = '@nombre';
+				dgcab.width = 250;
+				arrcols.addItem(dgcab);
+				dgcab = new AdvancedDataGridColumn;
+				dgcab.headerText = 'Total';
+				dgcab.dataField = '@hscar';
+				dgcab.setStyle('textAlign','right');
+				dgcab.formatter = nf;
+				dgcab.width = 80;
+				arrcols.addItem(dgcab);
+				for (n=1; n<13; n++){
+					var dg:AdvancedDataGridColumn = new AdvancedDataGridColumn;
+					dg.headerText = n.toString();
+					dg.dataField = "@m"+n.toString();
+					dg.setStyle('textAlign','right');
+					dg.formatter = nf;
+					dg.width=60;
+					arrcols.addItemAt(dg,n);
+				}
+				adg1.columns = arrcols.toArray();
+			}
+			
+			private function vistamensual():void{
+				var arrcols:ArrayCollection = new ArrayCollection;
+				var n:Number;
+				var dgcab:AdvancedDataGridColumn = new AdvancedDataGridColumn;
+				dgcab.headerText = 'Cuentas';
+				dgcab.dataField = '@nombre';
+				dgcab.width = 250;
+				arrcols.addItem(dgcab);
+				dgcab = new AdvancedDataGridColumn;
+				dgcab.headerText = 'Total';
+				dgcab.setStyle('textAlign','right');
+				dgcab.dataField = '@hscar';
+				dgcab.formatter = nf;
+				dgcab.width = 80;
+				arrcols.addItem(dgcab);
+				for (n=1; n<32; n++){
+					var dg:AdvancedDataGridColumn = new AdvancedDataGridColumn;
+					dg.headerText = n.toString();
+					dg.dataField = "@m"+n.toString();
+					dg.setStyle('textAlign','right');
+					dg.formatter = nf;
+					dg.width=50;
+					arrcols.addItemAt(dg,n);
+				}
+				adg1.columns = arrcols.toArray();
+			}
+
+			private function ffault(event:FaultEvent):void{
+				Alert.show(event.fault.faultString,'Error: RPC services Call');
+			}
+			
+		]]>
+	</mx:Script>		
+	
+	
+	<mx:VBox width="100%" height="100%" maxWidth="1150" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+				
+		<ns1:cuentas_cp id="cuentas_cp1" ActionEvent="faction(event)" />
+		<ns1:actividades_cp id="actividades_cp1" ActionEvent="faction(event)" />
+		<mx:HBox verticalAlign="middle" id="hbox2">
+			<mx:Label text="Planificación de tareas     "  fontWeight="bold" fontSize="22"/>			
+			<mx:Form borderStyle="solid" cornerRadius="15">
+				<mx:FormItem label="Periodo de Programación" direction="horizontal" fontWeight="bold">
+					<mx:ComboBox id="periodo_cb" change="fpershow()" width="100">
+						<mx:ArrayCollection>
+							<mx:String>Anual</mx:String>
+							<mx:String>Mensual</mx:String>
+						</mx:ArrayCollection>
+					</mx:ComboBox>
+					<mx:NumericStepper id="anio_ns" change="fpershow()" value="2011" minimum="2011" maximum="2050" stepSize="1"/>
+					<mx:NumericStepper id="mes_ns" change="fpershow()" value="2" minimum="1" maximum="12" stepSize="1"/>
+				</mx:FormItem>
+			</mx:Form>
+			<mx:Button label="Cuentas" click="fmantcuenta()" id="button1" icon="@Embed(source='../../icons/Tree.png')" width="120"/>
+			<mx:Button label="Actividades" click="fmantactividad()" id="button2" icon="@Embed(source='../../icons/Actividad.png')" width="120"/>
+		</mx:HBox>
+		<mx:AdvancedDataGrid id="adg1" dataProvider="{jerarquia}" width="100%" height="100%" selectionMode="singleCell"
+		     change="fselcel(event)" editable="false" horizontalScrollPolicy="on" verticalScrollPolicy="on">	
+	        <mx:columns>
+	            <mx:AdvancedDataGridColumn id="cuentas" dataField="" headerText="Cuenta" width="250"/>
+	            <mx:AdvancedDataGridColumn id="total" dataField="" headerText="Total" width="80"/>
+	        </mx:columns>
+	    </mx:AdvancedDataGrid>
+	</mx:VBox>	
+
+	<mx:transitions>
+        <mx:Transition id="myTransition" fromState="*" toState="*">
+            <mx:Parallel id="t1" targets="{[adg1,cuentas_cp1]}">
+                <!-- Define a Move and Resize effect.-->
+                <mx:Move  duration="800"/>
+                <mx:Resize duration="800"/>
+				<mx:Fade id="fadeIn" duration="800" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Parallel>
+        </mx:Transition>
+    </mx:transitions>
+
+	<mx:NumberFormatter id="nf" precision="2" useThousandsSeparator="true" />
+	<mx:HTTPService id="getactividadsmes" url="../actividads/indexcuentasactividadmes.xml" method="GET" resultFormat="xml" result="fgetactividads(event)" fault="ffault(event)" showBusyCursor="true"/>	
+	<mx:HTTPService id="getactividadsdia" url="../actividads/indexcuentasactividaddia.xml" method="GET" resultFormat="xml" result="fgetactividads(event)" fault="ffault(event)" showBusyCursor="true"/>	
+	
+</mx:Canvas>

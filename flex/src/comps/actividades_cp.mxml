@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" currentState="index" creationComplete="finit()">
+	
+	<mx:Script>
+		<![CDATA[
+			import vo.Fechaaux;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import vo.Cuenta;
+			import mx.collections.ArrayCollection;
+			import vo.Actividad;
+			import mx.controls.Alert;
+			import mx.controls.DateField;
+		
+			import Events.ActionEvent;
+			
+			[Bindable] private var actividad:Actividad = new Actividad(0,0,'','',null,0);
+			[Bindable] private var actividadsarr:ArrayCollection = new ArrayCollection;
+			[Bindable] private var fechasauxsarr:Array = new Array();
+			[Bindable] private var fechasauxsarrcol:ArrayCollection = new ArrayCollection;
+			
+			private var cuenta:Cuenta = new Cuenta(1,'','');
+			
+			public function setcuenta(cuenta:Cuenta):void{
+				this.cuenta = cuenta;
+				actividadsarr.removeAll();
+				findex();
+			}
+			
+			private function fgetactividads(event:ResultEvent):void{
+				var x:XML = new XML(event.result);
+				actividadsarr.removeAll();
+				
+				for each (var o:XML in x.actividad){
+					actividadsarr.addItem(new Actividad(o.@id,
+														o.@cuenta_id,
+														o.@nombre,
+														o.@descripcion,
+														DateField.stringToDate(o.@factividad,'YYYY-MM-DD'),
+														o.@hscar));
+				}
+			}
+			
+			private function fmetsel():void{
+				switch(metsel_cb.selectedItem){
+					case 'Única fecha':
+						fechasauxsarr = new Array();
+						fechasauxsarrcol.removeAll();
+						this.currentState='new_uf';
+						break;
+					case 'Rango de Fechas':
+						fechasauxsarr = new Array();
+						fechasauxsarrcol.removeAll();
+						this.currentState='new_rf';
+						break;										
+					case 'Sel de Fechas':
+						fechasauxsarr = new Array();
+						fechasauxsarrcol.removeAll();
+						this.currentState='new_sf';
+						break;
+				}
+			}
+			
+			private function findex():void{
+				getactividades.send(cuenta);
+				this.currentState = 'index';
+			}
+			
+			private function fshow():void{
+				if (datagrid1.selectedIndex >= 0){
+					actividad = actividadsarr.getItemAt(datagrid1.selectedIndex) as Actividad;
+					this.currentState = 'show';
+				} else {
+					Alert.show('Seleccione una actividad','Atención');
+				}
+			}
+			
+			private function fedit():void{
+				if (datagrid1.selectedIndex >= 0){
+					actividad = actividadsarr.getItemAt(datagrid1.selectedIndex) as Actividad;
+					this.currentState = 'edit';
+				} else {
+					Alert.show('Seleccione una actividad','Atención');
+				}
+			}
+			
+			private function fnew():void{
+				actividad = new Actividad(0,cuenta.id,cuenta.nombre,'',new Date(),0);
+				this.currentState = 'new_uf';
+			}
+			
+			private function fsave():void{
+				var o:Object = new Object;
+				if (id_txt.text=='0'){
+					o.id = 0;
+					o.accion = 'Agrega';
+				} else {
+					o.id = id_txt.text;
+					o.accion = 'Edita';
+				}
+				o.cuenta_id = cuenta.id;
+				o.descripcion = descripcion_txt.text;
+				o.hscar = hscar_txt.text;
+				switch(this.currentState){
+					case 'new_rf':
+						o.fechas = fechasauxsarr.toString();
+						o.metfecha = 'rf';
+						break;
+					case 'new_sf':
+						o.fechas = fechasauxsarr.toString();
+						o.metfecha = 'sf';
+						break;
+					default:
+						fechasauxsarr.push(df.format(datefield1.selectedDate));
+						o.fechas = fechasauxsarr.toString();
+						o.metfecha = 'uf';
+						break;
+				}
+				addactividad.send(o);
+				this.currentState = 'index';
+			}
+			
+			private function fdestroy():void{
+				this.currentState = 'index';
+			}
+			
+			private function freturn():void{
+				dispatchEvent(new ActionEvent('Cancela'));	
+			}
+			
+			private function formatfecha(item:Object,column:DataGridColumn):String{
+				return df.format(item.factividad);
+			}
+			
+			private function faddfecha(event:CalendarLayoutChangeEvent):void{
+				if (this.currentState == 'new_rf' && fechasauxsarr.length>=2){
+					Alert.show('Ya seleccionó el rango, borre y vuelva a seleccionar para cambiarlo','Atención');
+				} else {
+					fechasauxsarr.push(df.format(event.currentTarget.selectedDate));
+					fechasauxsarrcol.addItem(new Fechaaux(event.currentTarget.selectedDate));
+				}
+			}
+			
+			private function finit():void{
+			}
+			
+			private function ffault(event:FaultEvent):void{
+				Alert.show(event.fault.faultString,'Error: RPC services Call');
+			}
+			
+		]]>
+	</mx:Script>
+
+	<mx:Metadata>
+	    [Event(name="ActionEvent", type="Events.ActionEvent")]
+	</mx:Metadata>	
+	
+	<mx:states>
+		<mx:State name="index">
+			<mx:RemoveChild target="{form1}"/>
+			<mx:RemoveChild target="{btindex}"/>
+			<mx:RemoveChild target="{btsave}"/>
+		</mx:State>
+		<mx:State name="new">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btshow}"/>
+			<mx:RemoveChild target="{btedit}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:SetProperty target="{nombre_txt}" name="editable" value="false"/>
+			<mx:SetStyle target="{descripcion_txt}" name="backgroundColor" value="#F8FCCF"/>
+			<mx:SetStyle target="{hscar_txt}" name="backgroundColor" value="#F8FCCF"/>
+			<mx:SetStyle target="{datefield1}" name="backgroundColor" value="#F8FCCF"/>
+			<mx:RemoveChild target="{label1}"/>
+		</mx:State>
+		<mx:State name="show">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{vbox1}"/>
+			<mx:RemoveChild target="{datechooser1}"/>
+			<mx:RemoveChild target="{datagrid2}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btshow}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:RemoveChild target="{btsave}"/>
+			<mx:SetProperty target="{id_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{nombre_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{hscar_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{descripcion_txt}" name="editable" value="false"/>
+			<mx:RemoveChild target="{datefield1}"/>
+			<mx:RemoveChild target="{button1}"/>
+		</mx:State>
+		<mx:State name="edit">
+			<mx:RemoveChild target="{datagrid1}"/>
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btedit}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:RemoveChild target="{vbox1}"/>
+			<mx:RemoveChild target="{datechooser1}"/>
+			<mx:RemoveChild target="{datagrid2}"/>
+			<mx:SetStyle target="{nombre_txt}" name="backgroundColor" value="#F8FCCF"/>
+			<mx:SetStyle target="{descripcion_txt}" name="backgroundColor" value="#F8FCCF"/>
+			<mx:SetStyle target="{hscar_txt}" name="backgroundColor" value="#F8FCCF"/>
+			<mx:SetStyle target="{datefield1}" name="backgroundColor" value="#F8FCCF"/>
+			<mx:RemoveChild target="{label1}"/>
+			<mx:RemoveChild target="{button1}"/>
+		</mx:State>
+		<mx:State name="new_uf" basedOn="new">
+			<mx:RemoveChild target="{datechooser1}"/>
+			<mx:RemoveChild target="{datagrid2}"/>
+			<mx:RemoveChild target="{button1}"/>
+		</mx:State>
+		<mx:State name="new_rf" basedOn="new">
+			<mx:RemoveChild target="{datefield1}"/>
+		</mx:State>
+		<mx:State name="new_sf" basedOn="new">
+			<mx:RemoveChild target="{datefield1}"/>
+		</mx:State>
+		<mx:State name="new_select" basedOn="new">
+			<mx:RemoveChild target="{datefield1}"/>
+			<mx:RemoveChild target="{datechooser1}"/>
+			<mx:RemoveChild target="{datagrid2}"/>
+			<mx:RemoveChild target="{button1}"/>
+		</mx:State>
+	</mx:states>
+	
+	<mx:transitions>
+        <mx:Transition id="myTransition" fromState="*" toState="*">
+            <mx:Parallel id="t1" targets="{[form1,datagrid1,btindex,btnew,btshow,btedit,btdestroy,btsave,btreturn,vbox1,datechooser1,datagrid2,datefield1,label1]}">
+                <!-- Define a Move and Resize effect.-->
+                <mx:Move  duration="800"/>
+                <mx:Resize duration="800"/>
+				<mx:Fade id="fadeIn" duration="800" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Parallel>
+        </mx:Transition>
+    </mx:transitions>
+	
+	<mx:VBox>
+		<mx:DataGrid height="400" id="datagrid1" dataProvider="{actividadsarr}">
+			<mx:columns>
+				<mx:DataGridColumn headerText="Id" dataField="id" width="50" textAlign="center"/>
+				<mx:DataGridColumn headerText="Nombre" dataField="nombre" width="350"/>
+				<mx:DataGridColumn headerText="F Ejecución" dataField="factividad" width="90" labelFunction="formatfecha" textAlign="center"/>
+				<mx:DataGridColumn headerText="Hs Diarias" dataField="hscar" width="80" textAlign="right"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:Form id="form1">
+			<mx:FormHeading label="Actividades"/>
+			<mx:FormItem label="Id">
+				<mx:TextInput id="id_txt" text="{actividad.id}" width="60" editable="false"/>
+			</mx:FormItem>
+			<mx:FormItem label="Nombre">
+				<mx:TextInput id="nombre_txt" text="{actividad.nombre}" width="300"/>
+			</mx:FormItem>
+			<mx:FormItem label="Descripción de la Tarea">
+				<mx:TextArea id="descripcion_txt" text="{actividad.descripcion}" width="300"/>
+			</mx:FormItem>
+			<mx:FormItem label="Hs Diarias">
+				<mx:TextInput id="hscar_txt" text="{actividad.hscar}" width="60"/>
+			</mx:FormItem>
+			<mx:FormItem label="Fechas de ejecución" direction="horizontal">
+				<mx:VBox id="vbox1">
+					<mx:ComboBox id="metsel_cb" change="fmetsel()">
+						<mx:ArrayCollection>
+							<mx:String>Única fecha</mx:String>
+							<mx:String>Rango de Fechas</mx:String>
+							<mx:String>Sel de Fechas</mx:String>
+						</mx:ArrayCollection>
+					</mx:ComboBox>
+				</mx:VBox>
+				<mx:DateField id="datefield1" selectedDate="{actividad.factividad}" formatString="{'DD/MM/YYYY'}"/>
+				<mx:Label text="{df.format(actividad.factividad)}"  id="label1"/>
+				<mx:DateChooser id="datechooser1" change="faddfecha(event)"/>
+				<mx:VBox>
+					<mx:DataGrid height="151" width="104" id="datagrid2" dataProvider="{fechasauxsarrcol}">
+						<mx:columns>
+							<mx:DataGridColumn headerText="Fechas" dataField="factividad" labelFunction="formatfecha" width="70" textAlign="center"/>
+						</mx:columns>
+					</mx:DataGrid>
+					<mx:Button label="Borra fechas" click="fechasauxsarr = new Array();fechasauxsarrcol = new ArrayCollection()"  id="button1"/>
+				</mx:VBox>
+			</mx:FormItem>
+			<mx:FormItem label="Recursos Disponibles">
+				<mx:TextInput width="60"/>
+			</mx:FormItem>
+		</mx:Form>
+		<mx:HBox>
+			<mx:Button id="btnew"     click="fnew()" label="Nuevo" icon="@Embed(source='../../icons/new.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btshow"    click="fshow()" label="Ver" icon="@Embed(source='../../icons/Search.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btedit"    click="fedit()" label="Edita" icon="@Embed(source='../../icons/Edit.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btdestroy" click="fdestroy()" label="Borra" icon="@Embed(source='../../icons/Delete.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btsave"    click="fsave()" label="Salva" icon="@Embed(source='../../icons/Save.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btindex"   click="findex()" label="Lista" icon="@Embed(source='../../icons/show.png')" labelPlacement="bottom" width="70" height="48"/>				
+			<mx:Button id="btreturn"  click="freturn()" label="Cierra" icon="@Embed(source='../../icons/minimize.png')" labelPlacement="bottom" width="70" height="48"/>				
+		</mx:HBox>
+	</mx:VBox>
+
+	<mx:HTTPService id="getactividades" url="../actividads.xml" method="GET" resultFormat="xml" result="fgetactividads(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="addactividad" url="../actividads/addactividad" method="GET" resultFormat="xml" result="fgetactividads(event)" fault="ffault(event)" showBusyCursor="true"/>	
+	<mx:DateFormatter id="df" formatString="DD/MM/YYYY" />
+</mx:Canvas>

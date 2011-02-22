@@ -1,0 +1,23 @@
+<h1>Listing tvehiculos</h1>
+
+<table>
+  <tr>
+    <th>Tipo</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @tvehiculos.each do |tvehiculo| %>
+  <tr>
+    <td><%= tvehiculo.tipo %></td>
+    <td><%= link_to 'Show', tvehiculo %></td>
+    <td><%= link_to 'Edit', edit_tvehiculo_path(tvehiculo) %></td>
+    <td><%= link_to 'Destroy', tvehiculo, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Tvehiculo', new_tvehiculo_path %>

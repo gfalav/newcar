@@ -1,0 +1,33 @@
+<h1>Listing personals</h1>
+
+<table>
+  <tr>
+    <th>Apellido</th>
+    <th>Nombre</th>
+    <th>Documento</th>
+    <th>Telefono</th>
+    <th>Direccion</th>
+    <th>Contratista</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @personals.each do |personal| %>
+  <tr>
+    <td><%= personal.apellido %></td>
+    <td><%= personal.nombre %></td>
+    <td><%= personal.documento %></td>
+    <td><%= personal.telefono %></td>
+    <td><%= personal.direccion %></td>
+    <td><%= personal.contratista_id %></td>
+    <td><%= link_to 'Show', personal %></td>
+    <td><%= link_to 'Edit', edit_personal_path(personal) %></td>
+    <td><%= link_to 'Destroy', personal, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Personal', new_personal_path %>

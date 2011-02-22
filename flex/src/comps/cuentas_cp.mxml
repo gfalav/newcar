@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" currentState="index">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.XMLListCollection;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.controls.Alert;
+			import mx.collections.HierarchicalData;
+			import vo.Cuenta;
+			
+			import Events.ActionEvent;
+			
+			[Bindable] private var cuenta:Cuenta = new Cuenta(0,'','');
+			[Bindable] private var listcuentas:XMLList;
+			[Bindable] private var listcollection:XMLListCollection = new XMLListCollection;
+			[Bindable] private var jerarquia:HierarchicalData = new HierarchicalData;
+			
+			public function init():void{
+				listcollection = new XMLListCollection;
+				getcuentas.send();
+				this.currentState='index';
+			}
+			
+			private function fgetcuentas(event:ResultEvent):void{
+				listcuentas = new XMLList(event.result);
+				listcollection = new XMLListCollection(listcuentas);
+				jerarquia = new HierarchicalData(listcuentas);
+			}
+			
+			private function findex():void{
+				this.currentState = 'index';
+			}
+
+			private function fshow():void{
+				if (tree1.selectedItem!=null){
+					this.currentState = 'show';
+					cuenta = new Cuenta(tree1.selectedItem.@id,
+										tree1.selectedItem.@nombre,
+										tree1.selectedItem.@ancestry);
+				} else {
+					Alert.show("Seleccione una cuenta",'Atención');
+				}
+			}
+
+			private function fedit():void{
+				if (tree1.selectedItem!=null){
+					this.currentState = 'edit';
+					cuenta = new Cuenta(tree1.selectedItem.@id,
+										tree1.selectedItem.@nombre,
+										tree1.selectedItem.@ancestry);
+				} else {
+					Alert.show("Seleccione una cuenta",'Atención');
+				}
+			}
+
+			private function fnew():void{
+				if (tree1.selectedItem !=null){
+					this.currentState = 'new';
+					cuenta = new Cuenta(0,'',tree1.selectedItem.@ancestry+'/'+tree1.selectedItem.@id);
+				} else {
+					Alert.show("Seleccione una cuenta",'Atención');
+				}
+			}
+
+			private function fsave():void{
+				var o:Object = new Object;
+				o.id = cuenta.id;
+				o.nombre = nombre_txt.text;
+				o.ancestry = ancestry_txt.text;
+				
+				if (cuenta.id == 0) {
+					o.accion = 'Agrega';
+				} else {
+					o.accion = 'Edita';
+				}
+				addcuenta.send(o);
+				listcollection = null;
+				this.currentState = 'index';
+			}
+
+			private function fdestroy():void{
+				var o:Object = new Object;
+				o.id = cuenta.id;
+				o.accion = 'Borra';
+				this.currentState = 'index';
+			}
+
+			private function freturn():void{
+				dispatchEvent(new ActionEvent('Cancela'));	
+			}
+
+			private function ffault(event:FaultEvent):void{
+				Alert.show(event.fault.faultString,'Error: RPC services Call');
+			}
+			
+		]]>
+	</mx:Script>
+
+	<mx:Metadata>
+	    [Event(name="ActionEvent", type="Events.ActionEvent")]
+	</mx:Metadata>	
+
+	<mx:states>
+		<mx:State name="index">
+			<mx:RemoveChild target="{form1}"/>
+			<mx:RemoveChild target="{btsave}"/>
+			<mx:RemoveChild target="{btindex}"/>
+		</mx:State>
+		<mx:State name="new">
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btshow}"/>
+			<mx:RemoveChild target="{btedit}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:SetStyle target="{nombre_txt}" name="backgroundColor" value="#F8FCCF"/>
+			<mx:SetStyle target="{ancestry_txt}" name="backgroundColor" value="#F8FCCF"/>
+			<mx:SetProperty target="{ancestry_txt}" name="editable" value="false"/>
+		</mx:State>
+		<mx:State name="show">
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btshow}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:RemoveChild target="{btsave}"/>
+			<mx:SetProperty target="{nombre_txt}" name="editable" value="false"/>
+			<mx:SetProperty target="{ancestry_txt}" name="editable" value="false"/>
+		</mx:State>
+		<mx:State name="edit">
+			<mx:RemoveChild target="{btnew}"/>
+			<mx:RemoveChild target="{btedit}"/>
+			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:SetStyle target="{nombre_txt}" name="backgroundColor" value="#F8FCCF"/>
+			<mx:SetStyle target="{ancestry_txt}" name="backgroundColor" value="#F8FCCF"/>
+		</mx:State>
+	</mx:states>
+
+	<mx:transitions>
+        <mx:Transition id="myTransition" fromState="*" toState="*">
+            <mx:Parallel id="t1" targets="{[form1,btindex,btnew,btshow,btedit,btdestroy,btsave,btreturn,tree1]}">
+                <!-- Define a Move and Resize effect.-->
+                <mx:Move  duration="800"/>
+                <mx:Resize duration="800"/>
+				<mx:Fade id="fadeIn" duration="800" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Parallel>
+        </mx:Transition>
+    </mx:transitions>
+
+	<mx:VBox>
+		<mx:HBox>			
+			<mx:Tree id="tree1" height="450" width="540" dataProvider="{listcollection}" labelField="@nombre"></mx:Tree>
+			<mx:Form id="form1">
+				<mx:FormHeading label="Cuentas"/>
+				<mx:FormItem label="Id">
+					<mx:TextInput id="id_txt" text="{cuenta.id}" width="60" editable="false"/>
+				</mx:FormItem>
+				<mx:FormItem label="Nombre">
+					<mx:TextInput id="nombre_txt" text="{cuenta.nombre}" width="300"/>
+				</mx:FormItem>
+				<mx:FormItem label="Ancestry">
+					<mx:TextInput id="ancestry_txt" text="{cuenta.ancestry}" width="300"/>
+				</mx:FormItem>
+			</mx:Form>
+		</mx:HBox>
+		<mx:HBox>
+			<mx:Button id="btnew"     click="fnew()" label="Nuevo" icon="@Embed(source='../../icons/new.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btshow"    click="fshow()" label="Ver" icon="@Embed(source='../../icons/Search.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btedit"    click="fedit()" label="Edita" icon="@Embed(source='../../icons/Edit.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btdestroy" click="fdestroy()" label="Borra" icon="@Embed(source='../../icons/Delete.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btsave"    click="fsave()" label="Salva" icon="@Embed(source='../../icons/Save.png')" labelPlacement="bottom" width="70" height="48"/>
+			<mx:Button id="btindex"   click="findex()" label="Lista" icon="@Embed(source='../../icons/show.png')" labelPlacement="bottom" width="70" height="48"/>				
+			<mx:Button id="btreturn"  click="freturn()" label="Cierra" icon="@Embed(source='../../icons/minimize.png')" labelPlacement="bottom" width="70" height="48"/>				
+		</mx:HBox>
+	</mx:VBox>
+
+	<mx:HTTPService id="getcuentas" url="../cuentas.xml" method="GET" resultFormat="xml" result="fgetcuentas(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="addcuenta" url="../cuentas/addcuenta" method="GET" resultFormat="xml" result="fgetcuentas(event)" fault="ffault(event)" showBusyCursor="true"/>	
+</mx:Canvas>

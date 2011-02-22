@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Cuenta:</b>
+  <%= @actividad.cuenta_id %>
+</p>
+
+<p>
+  <b>Fdesde:</b>
+  <%= @actividad.fdesde %>
+</p>
+
+<p>
+  <b>Fhasta:</b>
+  <%= @actividad.fhasta %>
+</p>
+
+<p>
+  <b>Cantidad:</b>
+  <%= @actividad.cantidad %>
+</p>
+
+<p>
+  <b>Hscar:</b>
+  <%= @actividad.hscar %>
+</p>
+
+
+<%= link_to 'Edit', edit_actividad_path(@actividad) %> |
+<%= link_to 'Back', actividads_path %>
