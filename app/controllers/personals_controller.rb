@@ -60,6 +60,18 @@ class PersonalsController < ApplicationController
     return cadena
   end
 
+  def getpersdisp
+    @personals = Personal.where(:movil_id=>0)
+
+    cadena = getpersonals(@personals)
+
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml  { render :xml => cadena }
+    end
+  end
+
   # GET /personals/1
   # GET /personals/1.xml
   def show

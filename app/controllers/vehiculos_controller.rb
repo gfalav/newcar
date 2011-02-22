@@ -57,7 +57,17 @@ class VehiculosController < ApplicationController
     return cadena
   end
 
+  def getvehicdisp
+    @vehiculos = Vehiculo.where(:movil_id=>0)
 
+    cadena = getvehiculos(@vehiculos)    
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml  { render :xml => cadena }
+    end
+  end
+  
   # GET /vehiculos/1
   # GET /vehiculos/1.xml
   def show

@@ -12,6 +12,7 @@ Newcar::Application.routes.draw do
   resources :vehiculos do
     collection do
       get 'addvehiculo'
+      get 'getvehicdisp'
     end
   end
 
@@ -20,6 +21,7 @@ Newcar::Application.routes.draw do
   resources :personals do
     collection do
       get 'addpersonal'
+      get 'getpersdisp'
     end
   end
 

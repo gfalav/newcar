@@ -56,7 +56,8 @@
 			private function fshow():void{
 				if (datagrid1.selectedIndex >= 0){
 					vehiculo = vehiculosarr.getItemAt(datagrid1.selectedIndex) as Vehiculo;
-					this.currentState = 'show';
+					settvehiculo(vehiculo.tvehiculo_id);
+				this.currentState = 'show';
 				} else {
 					Alert.show('Seleccione un vehículo de la lista','Atención');
 				}
@@ -64,6 +65,7 @@
 			private function fedit():void{
 				if (datagrid1.selectedIndex >= 0){
 					vehiculo = vehiculosarr.getItemAt(datagrid1.selectedIndex) as Vehiculo;
+					settvehiculo(vehiculo.tvehiculo_id);
 					this.currentState = 'edit';
 				} else {
 					Alert.show('Seleccione un vehículo de la lista','Atención');
@@ -71,6 +73,7 @@
 			}
 			private function fnew():void{
 				vehiculo = new Vehiculo(0,'','','',0,0,'');
+				settvehiculo(vehiculo.tvehiculo_id);
 				tvehiculo_cb.selectedIndex=0;
 				this.currentState = 'new';
 			}
@@ -97,6 +100,17 @@
 			}
 			private function freturn():void{
 				dispatchEvent(new ActionEvent('Cancela'));	
+			}
+			
+			private function settvehiculo(tvehiculo_id:Number):void{
+				var n:Number=0;
+				for each (var t:Tvehiculo in tvehiculosarr){
+					if (t.id == tvehiculo_id){
+						tvehiculo_cb.selectedIndex = n;
+					} else {
+						n+=1;
+					}
+				}
 			}
 			
 			private function ffault(event:FaultEvent):void{

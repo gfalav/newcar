@@ -8,13 +8,39 @@ class MovilsController < ApplicationController
       when 'Agrega'
         movil = Movil.new
         movil.nombre = params[:nombre]
-        movil.ofcar_id = params[:ofcar_id]
+        movil.ofcar_id = params[:ofcar_id].to_i
         movil.save
+        vehiculo = Vehiculo.find(params[:vehiculo_id].to_i)
+        vehiculo.movil_id = movil.id
+        vehiculo.save
+        a = params[:personalsarr].split(',')
+        a.each {|p|
+          personal = Personal.find(p.to_i)
+          personal.movil_id = movil.id
+          personal.save
+        }
       when 'Edita'
         movil = Movil.find(params[:id].to_i)
         movil.nombre = params[:nombre]
-        movil.ofcar_id = params[:ofcar_id]
+        movil.ofcar_id = params[:ofcar_id].to_i
         movil.save
+        Vehiculo.where(:movil_id=>params[:id].to_i).each {|v|
+          v.movil_id = 0
+          v.save
+        }
+        vehiculo = Vehiculo.find(params[:vehiculo_id])
+        vehiculo.movil_id = movil.id
+        vehiculo.save
+        Personal.where(:movil_id=>params[:id].to_i).each {|p|
+          p.movil_id = 0
+          p.save
+        }
+        a = params[:personalsarr].split(',')
+        a.each {|p|
+          personal = Personal.find(p.to_i)
+          personal.movil_id = movil.id
+          personal.save
+        }
       when 'Borra'
         movil = Movil.find(params[:id].to_i)
         movil.destroy

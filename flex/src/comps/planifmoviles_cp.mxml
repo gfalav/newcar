@@ -138,9 +138,9 @@
 		<ns1:vehiculos_cp id="vehiculos_cp1" ActionEvent="faction(event)" />
 		<ns1:moviles_cp id="moviles_cp1" ActionEvent="faction(event)" />
 		<mx:HBox verticalAlign="middle" id="hbox2">
-			<mx:Label text="Planificación de móviles     "  fontWeight="bold" fontSize="22"/>			
+			<mx:Label text="Planificación de móviles"  fontWeight="bold" fontSize="22" id="label1"/>			
 			<mx:Form borderStyle="solid" cornerRadius="15">
-				<mx:FormItem label="Periodo de Programación" direction="horizontal" fontWeight="bold">
+				<mx:FormItem label="Periodo Programación" direction="horizontal" fontWeight="bold" id="formitem1">
 					<mx:ComboBox id="periodo_cb" change="fpershow()" width="100">
 						<mx:ArrayCollection>
 							<mx:String>Anual</mx:String>

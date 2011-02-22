@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" currentState="index">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" currentState="index" dragEnter="fdragenterlpers(event)" dragDrop="fdragdroplpers(event)">
 
 	<mx:Script>
 		<![CDATA[
+			import mx.events.DragEvent;
+			import mx.core.DragSource;
 			import vo.Vehiculo;
 			import vo.Personal;
 			import vo.Ofcar;
@@ -11,17 +13,75 @@
 			import mx.rpc.events.FaultEvent;
 			import vo.Movil;
 			import mx.controls.Alert;
+			import mx.managers.DragManager;
 
 			import Events.ActionEvent;
 			
 			[Bindable] private var movil:Movil;
 			[Bindable] private var movilsarr:ArrayCollection = new ArrayCollection;
 			[Bindable] private var ofcarsarr:ArrayCollection = new ArrayCollection;
+			[Bindable] private var vehiculosarr:ArrayCollection = new ArrayCollection;
+			[Bindable] private var personalsarr:ArrayCollection = new ArrayCollection;
 			
+			private function fdragvehic(event:MouseEvent):void{				
+				var ds:DragSource = new DragSource();
+				ds.addData(vehiculosarr.getItemAt(datagrid3.selectedIndex) as Vehiculo,'vehiculo');
+				DragManager.doDrag(datagrid3,ds,event);
+			}
+			
+			private function fdragentervehic(event:DragEvent):void{
+				if (event.dragSource.hasFormat('vehiculo')) {
+                	DragManager.acceptDragDrop(vehiculo_txt);
+            	}				
+			}
+			
+			private function fdragdropvehic(event:DragEvent):void{
+				if (movil.vehiculo.id!=0){vehiculosarr.addItem(movil.vehiculo);	}
+				movil.vehiculo = event.dragSource.dataForFormat('vehiculo') as Vehiculo;
+				vehiculosarr.removeItemAt(datagrid3.selectedIndex);
+			}
+			
+			private function fdragpers(event:MouseEvent):void{				
+				var ds:DragSource = new DragSource();
+				ds.addData(personalsarr.getItemAt(datagrid2.selectedIndex) as Personal,'personal');
+				DragManager.doDrag(datagrid2,ds,event);
+			}
+			
+			private function fdragenterpers(event:DragEvent):void{
+				if (event.dragSource.hasFormat('personal')) {
+                	DragManager.acceptDragDrop(list1);
+            	}				
+			}
+			
+			private function fdragdroppers(event:DragEvent):void{
+				movil.personalsarr.addItem(event.dragSource.dataForFormat('personal') as Personal);
+				personalsarr.removeItemAt(datagrid2.selectedIndex);
+				list1.dataProvider = movil.personalsarr;
+			}
+			
+			private function fdraglpers(event:MouseEvent):void{				
+				var ds:DragSource = new DragSource();
+				ds.addData(movil.personalsarr.getItemAt(list1.selectedIndex) as Personal,'droppersonal');
+				DragManager.doDrag(list1,ds,event);
+			}
+						
+			private function fdragenterlpers(event:DragEvent):void{
+				if (event.dragSource.hasFormat('droppersonal')) {
+                	DragManager.acceptDragDrop(this);
+            	}				
+			}
+			
+			private function fdragdroplpers(event:DragEvent):void{
+				movil.personalsarr.removeItemAt(list1.selectedIndex);
+				personalsarr.addItem(event.dragSource.dataForFormat('droppersonal') as Personal);
+				list1.dataProvider = movil.personalsarr;
+			}
 			public function finit():void{
 				movilsarr.removeAll();
 				getmovils.send();
 				getofcars.send();
+				getpersdisp.send();
+				getvehicdisp.send();
 				this.currentState='index';
 			} 			
 			
@@ -51,8 +111,7 @@
 																p.@contratista_id,
 																p.@contratista));
 					}
-					movilsarr.addItem(movil);
-												
+					movilsarr.addItem(movil);												
 				}				
 			}
 			
@@ -60,9 +119,42 @@
 				var x:XML = new XML(event.result);
 				ofcarsarr.removeAll();
 				ofcarsarr.addItem(new Ofcar(0,'Sel Of.Car'));
-				for each (var o:XML in x.oficina){
-					movilsarr.addItem(new Ofcar(o.@id,o.@oficina));
+				for each (var o:XML in x.ofcar){
+					ofcarsarr.addItem(new Ofcar(o.@id,o.@oficina));
 				}				
+			}
+			
+			private function fgetvehiculos(event:ResultEvent):void{
+				var x:XML = new XML(event.result);
+				vehiculosarr.removeAll();
+				
+				for each (var o:XML in x.vehiculo){
+					vehiculosarr.addItem(new Vehiculo(o.@id,
+													  o.@patente,
+													  o.@marca,
+													  o.@modelo,
+													  o.@afabric,
+													  o.@tvehiculo_id,
+													  o.@tvehiculo));
+				}
+				
+			}
+
+			private function fgetpersonals(event:ResultEvent):void{
+				var x:XML = new XML(event.result);
+				personalsarr.removeAll();
+				
+				for each (var o:XML in x.personal){
+					personalsarr.addItem(new Personal(o.@id,
+													 o.@apellido,
+													 o.@nombre,
+													 o.@documento,
+													 o.@telefono,
+													 o.@direccion,
+													 o.@contratista_id,
+													 o.@contratista));
+				}
+				
 			}
 			
 			private function findex():void{
@@ -73,7 +165,8 @@
 			private function fshow():void{
 				if (datagrid1.selectedIndex >= 0){
 					movil = movilsarr.getItemAt(datagrid1.selectedIndex) as Movil;
-					this.currentState = 'show';
+					setofcar(movil.ofcar_id);
+				this.currentState = 'show';
 				} else {
 					Alert.show('Seleccione un móvil de la lista','Atención');
 				}
@@ -82,6 +175,7 @@
 			private function fedit():void{
 				if (datagrid1.selectedIndex >= 0){
 					movil = movilsarr.getItemAt(datagrid1.selectedIndex) as Movil;
+					setofcar(movil.ofcar_id);
 					this.currentState = 'edit';
 				} else {
 					Alert.show('Seleccione un móvil de la lista','Atención');
@@ -89,12 +183,33 @@
 			}
 			private function fnew():void{
 				movil = new Movil(0,'',0,'');
+				setofcar(movil.ofcar_id);
 				movil.personalsarr = new ArrayCollection;
 				movil.vehiculo = new Vehiculo(0,'','','',0,0,'');;
 				this.currentState = 'new';
 			}
 			
 			private function fsave():void{
+				var o:Object = new Object;
+				if (id_txt.text=='0'){
+					o.id = 0;
+					o.accion = 'Agrega';
+				} else {
+					o.id = id_txt.text;
+					o.accion = 'Edita';
+				}
+				o.ofcar_id = ofcarsarr.getItemAt(ofcar_cb.selectedIndex).id;
+				o.vehiculo_id = movil.vehiculo.id;
+				var a:Array = new Array;
+				o.nombre = '';
+				for each (var p:Personal in movil.personalsarr){
+					a.push(p.id);
+					o.nombre = o.nombre + p.apellido + ' - ';
+				}
+				o.nombre = o.nombre.substr(0,o.nombre.length-3);
+				o.personalsarr = a.toString();				
+				movilsarr.removeAll();				
+				addmovil.send(o);
 				this.currentState = 'index';
 			}
 			private function fdestroy():void{
@@ -102,6 +217,17 @@
 			}
 			private function freturn():void{
 				dispatchEvent(new ActionEvent('Cancela'));	
+			}
+			
+			private function setofcar(ofcar_id:Number):void{
+				var n:Number=0;
+				for each (var o:Ofcar in ofcarsarr){
+					if (o.id == ofcar_id){
+						ofcar_cb.selectedIndex = n;
+					} else {
+						n+=1;
+					}
+				}
 			}
 			
 			private function ffault(event:FaultEvent):void{
@@ -126,6 +252,7 @@
 			<mx:RemoveChild target="{btshow}"/>
 			<mx:RemoveChild target="{btedit}"/>
 			<mx:RemoveChild target="{btdestroy}"/>
+			<mx:RemoveChild target="{ofcar_txt}"/>
 		</mx:State>
 		<mx:State name="show">
 			<mx:RemoveChild target="{datagrid1}"/>
@@ -135,6 +262,7 @@
 			<mx:RemoveChild target="{btsave}"/>
 			<mx:RemoveChild target="{datagrid2}"/>
 			<mx:RemoveChild target="{datagrid3}"/>
+			<mx:RemoveChild target="{ofcar_cb}"/>
 		</mx:State>
 		<mx:State name="edit">
 			<mx:RemoveChild target="{datagrid1}"/>
@@ -143,6 +271,7 @@
 			<mx:RemoveChild target="{btdestroy}"/>
 			<mx:SetProperty target="{list1}" name="width" value="241"/>
 			<mx:SetProperty target="{vehiculo_txt}" name="width" value="241"/>
+			<mx:RemoveChild target="{ofcar_txt}"/>
 		</mx:State>
 	</mx:states>
 	
@@ -176,23 +305,23 @@
 				</mx:FormItem>
 				<mx:FormItem label="Of Car">
 					<mx:TextInput id="ofcar_txt" text="{movil.ofcar}" width="300"/>
-					<mx:ComboBox id="ofcar_cb" dataProvider="{ofcarsarr}" labelField="oficina" />
+					<mx:ComboBox id="ofcar_cb" dataProvider="{ofcarsarr}" labelField="oficina" width="300" />
 				</mx:FormItem>
 				<mx:FormItem label="Vehículo">
-					<mx:TextInput id="vehiculo_txt" text="{movil.vehiculo.patente}"/>
+					<mx:TextInput id="vehiculo_txt" text="{movil.vehiculo.patente}" dragEnter="fdragentervehic(event)" dragDrop="fdragdropvehic(event)"/>
 				</mx:FormItem>
 				<mx:FormItem label="Personal">
-					<mx:List height="60" id="list1" dataProvider="{movil.personalsarr}" labelField="apellido" width="300"></mx:List>
+					<mx:List height="60" id="list1" dataProvider="{movil.personalsarr}" mouseDown="fdraglpers(event)" dragEnter="fdragenterpers(event)" dragDrop="fdragdroppers(event)" labelField="apellido" width="300"></mx:List>
 				</mx:FormItem>
 			</mx:Form>
-			<mx:DataGrid height="229" id="datagrid2">
+			<mx:DataGrid height="229" id="datagrid2" dataProvider="{personalsarr}" mouseDown="fdragpers(event)">
 				<mx:columns>
-					<mx:DataGridColumn headerText="Personal Disp" dataField="col1" width="150"/>
+					<mx:DataGridColumn headerText="Personal Disp" dataField="apellido" width="150"/>
 				</mx:columns>
 			</mx:DataGrid>
-			<mx:DataGrid height="229" id="datagrid3">
+			<mx:DataGrid height="229" id="datagrid3" dataProvider="{vehiculosarr}" mouseDown="fdragvehic(event)">
 				<mx:columns>
-					<mx:DataGridColumn headerText="Vehículo Disp" dataField="col1" width="150"/>
+					<mx:DataGridColumn headerText="Vehículo Disp" dataField="patente" width="150"/>
 				</mx:columns>
 			</mx:DataGrid>
 		</mx:HBox>
@@ -209,6 +338,8 @@
 	
 	<mx:HTTPService id="getmovils" url="../movils.xml" method="GET" resultFormat="xml" result="fgetmovils(event)" fault="ffault(event)" showBusyCursor="true"/>
 	<mx:HTTPService id="getofcars" url="../ofcars.xml" method="GET" resultFormat="xml" result="fgetofcars(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="getvehicdisp" url="../vehiculos/getvehicdisp.xml" method="GET" resultFormat="xml" result="fgetvehiculos(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="getpersdisp" url="../personals/getpersdisp.xml" method="GET" resultFormat="xml" result="fgetpersonals(event)" fault="ffault(event)" showBusyCursor="true"/>
 	<mx:HTTPService id="addmovil" url="../movils/addmovil.xml" method="GET" resultFormat="xml" result="fgetmovils(event)" fault="ffault(event)" showBusyCursor="true"/>	
 	
 </mx:Canvas>
