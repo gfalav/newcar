@@ -3,21 +3,97 @@
 
 	<mx:Script>
 		<![CDATA[
+			import vo.Vehiculo;
+			import vo.Personal;
+			import vo.Ofcar;
+			import mx.collections.ArrayCollection;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import vo.Movil;
+			import mx.controls.Alert;
 
 			import Events.ActionEvent;
 			
+			[Bindable] private var movil:Movil;
+			[Bindable] private var movilsarr:ArrayCollection = new ArrayCollection;
+			[Bindable] private var ofcarsarr:ArrayCollection = new ArrayCollection;
+			
+			public function finit():void{
+				movilsarr.removeAll();
+				getmovils.send();
+				getofcars.send();
+				this.currentState='index';
+			} 			
+			
+			private function fgetmovils(event:ResultEvent):void{
+				var x:XML = new XML(event.result);
+				movilsarr.removeAll();
+				
+				for each (var o:XML in x.movil){
+					movil = new Movil(o.@id,
+									  o.@nombre,
+									  o.@ofcar_id,
+									  o.@ofcar);
+					movil.vehiculo = new Vehiculo(o.vehiculo.@id,
+												  o.vehiculo.@patente,
+												  o.vehiculo.@marca,
+												  o.vehiculo.@modelo,
+												  o.vehiculo.@afabric,
+												  o.vehiculo.@tvehiculo_id,
+												  o.vehiculo.@tvehiculo);
+					for each (var p:XML in o.personals.personal){
+						movil.personalsarr.addItem(new Personal(p.@id,
+																p.@apellido,
+																p.@nombre,
+																p.@documento,
+																p.@telefono,
+																p.@direccion,
+																p.@contratista_id,
+																p.@contratista));
+					}
+					movilsarr.addItem(movil);
+												
+				}				
+			}
+			
+			private function fgetofcars(event:ResultEvent):void{
+				var x:XML = new XML(event.result);
+				ofcarsarr.removeAll();
+				ofcarsarr.addItem(new Ofcar(0,'Sel Of.Car'));
+				for each (var o:XML in x.oficina){
+					movilsarr.addItem(new Ofcar(o.@id,o.@oficina));
+				}				
+			}
+			
 			private function findex():void{
+				finit();
 				this.currentState = 'index';
 			}
+			
 			private function fshow():void{
-				this.currentState = 'show';
+				if (datagrid1.selectedIndex >= 0){
+					movil = movilsarr.getItemAt(datagrid1.selectedIndex) as Movil;
+					this.currentState = 'show';
+				} else {
+					Alert.show('Seleccione un móvil de la lista','Atención');
+				}
 			}
+			
 			private function fedit():void{
-				this.currentState = 'edit';
+				if (datagrid1.selectedIndex >= 0){
+					movil = movilsarr.getItemAt(datagrid1.selectedIndex) as Movil;
+					this.currentState = 'edit';
+				} else {
+					Alert.show('Seleccione un móvil de la lista','Atención');
+				}
 			}
 			private function fnew():void{
+				movil = new Movil(0,'',0,'');
+				movil.personalsarr = new ArrayCollection;
+				movil.vehiculo = new Vehiculo(0,'','','',0,0,'');;
 				this.currentState = 'new';
 			}
+			
 			private function fsave():void{
 				this.currentState = 'index';
 			}
@@ -28,6 +104,9 @@
 				dispatchEvent(new ActionEvent('Cancela'));	
 			}
 			
+			private function ffault(event:FaultEvent):void{
+				Alert.show(event.fault.faultString,'Error: RPC services Call');
+			}
 		]]>
 	</mx:Script>
 
@@ -63,13 +142,13 @@
 			<mx:RemoveChild target="{btedit}"/>
 			<mx:RemoveChild target="{btdestroy}"/>
 			<mx:SetProperty target="{list1}" name="width" value="241"/>
-			<mx:SetProperty target="{textinput1}" name="width" value="241"/>
+			<mx:SetProperty target="{vehiculo_txt}" name="width" value="241"/>
 		</mx:State>
 	</mx:states>
 	
 	<mx:transitions>
         <mx:Transition id="myTransition" fromState="*" toState="*">
-            <mx:Parallel id="t1" targets="{[hbox1,datagrid1,btindex,btnew,btshow,btedit,btdestroy,btsave,btreturn,datagrid2,datagrid3,textinput1]}">
+            <mx:Parallel id="t1" targets="{[hbox1,datagrid1,btindex,btnew,btshow,btedit,btdestroy,btsave,btreturn,datagrid2,datagrid3,vehiculo_txt]}">
                 <!-- Define a Move and Resize effect.-->
                 <mx:Move  duration="800"/>
                 <mx:Resize duration="800"/>
@@ -79,30 +158,31 @@
     </mx:transitions>
 	
 	<mx:VBox>
-		<mx:DataGrid height="400" id="datagrid1">
+		<mx:DataGrid height="400" id="datagrid1" dataProvider="{movilsarr}">
 			<mx:columns>
-				<mx:DataGridColumn headerText="Id" dataField="col1" width="50"/>
-				<mx:DataGridColumn headerText="Móvil" dataField="col2" width="300"/>
-				<mx:DataGridColumn headerText="Of Car" dataField="col2" width="200"/>
+				<mx:DataGridColumn headerText="Id" dataField="id" width="50"/>
+				<mx:DataGridColumn headerText="Móvil" dataField="nombre" width="300"/>
+				<mx:DataGridColumn headerText="Of Car" dataField="ofcar" width="200"/>
 			</mx:columns>
 		</mx:DataGrid>
 		<mx:HBox id="hbox1">			
 			<mx:Form id="form1">
 				<mx:FormHeading label="Móviles"/>
 				<mx:FormItem label="Id">
-					<mx:TextInput width="60"/>
+					<mx:TextInput id="id_txt" text="{movil.id}" width="60"/>
 				</mx:FormItem>
 				<mx:FormItem label="Movil">
-					<mx:TextInput width="300"/>
+					<mx:TextInput id="nombre_txt" text="{movil.nombre}" width="300"/>
 				</mx:FormItem>
 				<mx:FormItem label="Of Car">
-					<mx:TextInput width="300"/>
+					<mx:TextInput id="ofcar_txt" text="{movil.ofcar}" width="300"/>
+					<mx:ComboBox id="ofcar_cb" dataProvider="{ofcarsarr}" labelField="oficina" />
 				</mx:FormItem>
 				<mx:FormItem label="Vehículo">
-					<mx:TextInput id="textinput1"/>
+					<mx:TextInput id="vehiculo_txt" text="{movil.vehiculo.patente}"/>
 				</mx:FormItem>
 				<mx:FormItem label="Personal">
-					<mx:List height="60" id="list1"></mx:List>
+					<mx:List height="60" id="list1" dataProvider="{movil.personalsarr}" labelField="apellido" width="300"></mx:List>
 				</mx:FormItem>
 			</mx:Form>
 			<mx:DataGrid height="229" id="datagrid2">
@@ -127,5 +207,8 @@
 		</mx:HBox>
 	</mx:VBox>
 	
+	<mx:HTTPService id="getmovils" url="../movils.xml" method="GET" resultFormat="xml" result="fgetmovils(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="getofcars" url="../ofcars.xml" method="GET" resultFormat="xml" result="fgetofcars(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="addmovil" url="../movils/addmovil.xml" method="GET" resultFormat="xml" result="fgetmovils(event)" fault="ffault(event)" showBusyCursor="true"/>	
 	
 </mx:Canvas>

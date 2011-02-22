@@ -1,0 +1,25 @@
+<%= form_for(@movil) do |f| %>
+  <% if @movil.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@movil.errors.count, "error") %> prohibited this movil from being saved:</h2>
+
+      <ul>
+      <% @movil.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :nombre %><br />
+    <%= f.text_field :nombre %>
+  </div>
+  <div class="field">
+    <%= f.label :ofcar_id %><br />
+    <%= f.text_field :ofcar_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

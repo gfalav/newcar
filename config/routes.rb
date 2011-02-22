@@ -1,4 +1,12 @@
 Newcar::Application.routes.draw do
+  resources :ofcars
+
+  resources :movils do
+    collection do
+      get 'addmovil'
+    end
+  end
+
   resources :tvehiculos
 
   resources :vehiculos do

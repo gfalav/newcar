@@ -1,0 +1,23 @@
+<h1>Listing ofcars</h1>
+
+<table>
+  <tr>
+    <th>Oficina</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @ofcars.each do |ofcar| %>
+  <tr>
+    <td><%= ofcar.oficina %></td>
+    <td><%= link_to 'Show', ofcar %></td>
+    <td><%= link_to 'Edit', edit_ofcar_path(ofcar) %></td>
+    <td><%= link_to 'Destroy', ofcar, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Ofcar', new_ofcar_path %>

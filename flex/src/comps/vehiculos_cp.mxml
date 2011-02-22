@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" currentState="index">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
 
 	<mx:Script>
 		<![CDATA[
@@ -20,6 +20,7 @@
 				vehiculosarr.removeAll();
 				getvehiculos.send();
 				gettvehiculos.send();
+				this.currentState='index';
 			} 
 			
 			private function fgetvehiculos(event:ResultEvent):void{

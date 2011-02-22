@@ -1,0 +1,15 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Nombre:</b>
+  <%= @movil.nombre %>
+</p>
+
+<p>
+  <b>Ofcar:</b>
+  <%= @movil.ofcar_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_movil_path(@movil) %> |
+<%= link_to 'Back', movils_path %>

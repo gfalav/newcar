@@ -69,6 +69,7 @@
 			}
 
 			private function fmantmoviles():void{
+				moviles_cp1.finit();
 				this.currentState='mantmoviles';
 			}
 

@@ -1,0 +1,21 @@
+<%= form_for(@ofcar) do |f| %>
+  <% if @ofcar.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@ofcar.errors.count, "error") %> prohibited this ofcar from being saved:</h2>
+
+      <ul>
+      <% @ofcar.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :oficina %><br />
+    <%= f.text_field :oficina %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
