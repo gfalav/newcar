@@ -303,7 +303,7 @@
 				<mx:FormItem label="Movil">
 					<mx:TextInput id="nombre_txt" text="{movil.nombre}" width="300"/>
 				</mx:FormItem>
-				<mx:FormItem label="Of Car">
+				<mx:FormItem label="Of Car" direction="horizontal">
 					<mx:TextInput id="ofcar_txt" text="{movil.ofcar}" width="300"/>
 					<mx:ComboBox id="ofcar_cb" dataProvider="{ofcarsarr}" labelField="oficina" width="300" />
 				</mx:FormItem>

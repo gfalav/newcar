@@ -221,7 +221,7 @@
 			<mx:FormItem label="Dirección">
 				<mx:TextInput id="direccion_txt" text="{personal.direccion}" width="300"/>
 			</mx:FormItem>
-			<mx:FormItem label="Contratista">
+			<mx:FormItem label="Contratista" direction="horizontal">
 				<mx:TextInput id="contratista_txt" text="{personal.contratista}" width="100" />
 				<mx:ComboBox id="contratista_cb" dataProvider="{contratistasarr}" labelField="nombre" width="150"/>
 			</mx:FormItem>

@@ -207,7 +207,7 @@
 			<mx:FormItem label="A Fabricación">
 				<mx:TextInput id="afabric_txt" text="{vehiculo.afabric}" width="60"/>
 			</mx:FormItem>
-			<mx:FormItem label="T Vehículo">
+			<mx:FormItem label="T Vehículo" direction="horizontal">
 				<mx:TextInput id="tvehiculo_txt" text="{vehiculo.tvehiculo}" width="300" />
 				<mx:ComboBox id="tvehiculo_cb" dataProvider="{tvehiculosarr}" labelField="tipo" width="300"/>
 			</mx:FormItem>

@@ -41,20 +41,11 @@
 			import mx.collections.ArrayCollection;
 			
 			public function finit():void{
-				vistaanual();
+				vistamensual();
 			}
 
 			private function fpershow():void{
-				switch(periodo_cb.selectedItem){
-					case 'Anual':
-						vistaanual();
-						break;
-					case 'Mensual':
-						vistamensual()
-						break;
-					case 'Diario':
-						break;
-				}
+				vistamensual();
 			}
 
 			
@@ -77,31 +68,6 @@
 				if (event.accion =='Cancela'){
 					this.currentState = 'inicial';
 				}
-			}
-			
-			private function vistaanual():void{
-				var arrcols:ArrayCollection = new ArrayCollection;
-				var n:Number;
-				var dgcab:AdvancedDataGridColumn = new AdvancedDataGridColumn;
-				dgcab.headerText = 'Cuentas';
-				dgcab.dataField = '@cuenta';
-				dgcab.width = 250;
-				arrcols.addItem(dgcab);
-				dgcab = new AdvancedDataGridColumn;
-				dgcab.headerText = 'Total';
-				dgcab.dataField = '@hscar';
-				dgcab.formatter = nf;
-				dgcab.width = 80;
-				arrcols.addItem(dgcab);
-				for (n=1; n<13; n++){
-					var dg:AdvancedDataGridColumn = new AdvancedDataGridColumn;
-					dg.headerText = n.toString();
-					dg.dataField = "@m"+n.toString();
-					dg.formatter = nf;
-					dg.width=60;
-					arrcols.addItemAt(dg,n);
-				}
-				adg1.columns = arrcols.toArray();
 			}
 			
 			private function vistamensual():void{
@@ -141,12 +107,6 @@
 			<mx:Label text="Planificación de móviles"  fontWeight="bold" fontSize="22" id="label1"/>			
 			<mx:Form borderStyle="solid" cornerRadius="15">
 				<mx:FormItem label="Periodo Programación" direction="horizontal" fontWeight="bold" id="formitem1">
-					<mx:ComboBox id="periodo_cb" change="fpershow()" width="100">
-						<mx:ArrayCollection>
-							<mx:String>Anual</mx:String>
-							<mx:String>Mensual</mx:String>
-						</mx:ArrayCollection>
-					</mx:ComboBox>
 					<mx:NumericStepper id="anio_ns" change="fpershow()" value="2011" minimum="2011" maximum="2050" stepSize="1"/>
 					<mx:NumericStepper id="mes_ns" change="fpershow()" value="2" minimum="1" maximum="12" stepSize="1"/>
 				</mx:FormItem>
