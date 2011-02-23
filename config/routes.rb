@@ -1,7 +1,11 @@
 Newcar::Application.routes.draw do
   resources :tturnos
 
-  resources :turnos
+  resources :turnos do
+    collection do
+      get 'saveturnos'
+    end
+  end
 
   resources :ofcars
 

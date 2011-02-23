@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" minHeight="500" 
-	xmlns:ns1="comps.*" currentState="inicial" 
-	horizontalScrollPolicy="off" verticalScrollPolicy="off" creationComplete="finit()">
+	xmlns:ns1="comps.*" currentState="inicial_edit" 
+	horizontalScrollPolicy="off" verticalScrollPolicy="off">
 
 	<mx:states>
 		<mx:State name="inicial">
 			<mx:RemoveChild target="{personal_cp1}"/>
 			<mx:RemoveChild target="{vehiculos_cp1}"/>
 			<mx:RemoveChild target="{moviles_cp1}"/>
-			<mx:SetProperty target="{button2}" name="height" value="30"/>
-			<mx:SetProperty target="{button1}" name="height" value="30"/>
-			<mx:SetProperty target="{button3}" name="height" value="30"/>
-			<mx:SetProperty target="{button1}" name="width" value="110"/>
-			<mx:SetProperty target="{button2}" name="width" value="110"/>
-			<mx:SetProperty target="{button3}" name="width" value="110"/>
+		</mx:State>
+		<mx:State name="inicial_edit" basedOn="inicial">
+			<mx:RemoveChild target="{btshow}"/>			
+		</mx:State>
+		<mx:State name="inicial_show" basedOn="inicial">
+			<mx:RemoveChild target="{btedit}"/>			
 		</mx:State>
 		<mx:State name="mantvehiculos">
 			<mx:RemoveChild target="{adg1}"/>
@@ -62,9 +62,26 @@
 			}
 
 			private function fpershow():void{
-				vistamensual();
+				finit();
 			}
 
+			private function fedit():void{
+				this.currentState='inicial_show';
+				adg1.editable = 'true';
+			}
+			
+			private function fshow():void{
+				this.currentState='inicial_edit';
+				adg1.editable = 'false';
+			}
+			
+			private function fsave():void{
+				var o:Object = new Object;
+				o.jerarquia = jerarquia.source;
+				o.anio = anio_ns.value;
+				o.mes = mes_ns.value;
+				saveturnos.send(o);
+			}
 			
 			private function fmantpersonal():void{
 				personal_cp1.finit();
@@ -94,12 +111,14 @@
 				dgcab.headerText = 'Móviles';
 				dgcab.dataField = '@nombre';
 				dgcab.width = 250;
+				dgcab.editable= false;
 				arrcols.addItem(dgcab);
 				dgcab = new AdvancedDataGridColumn;
 				for (n=1; n<32; n++){
 					var dg:AdvancedDataGridColumn = new AdvancedDataGridColumn;
 					dg.headerText = n.toString();
 					dg.dataField = "@f"+n.toString();
+					dg.editable = true;
 					dg.setStyle('textAlign','center');
 					dg.formatter = nf;
 					dg.width=50;
@@ -121,18 +140,22 @@
 		<ns1:vehiculos_cp id="vehiculos_cp1" ActionEvent="faction(event)" />
 		<ns1:moviles_cp id="moviles_cp1" ActionEvent="faction(event)" />
 		<mx:HBox verticalAlign="middle" id="hbox2">
-			<mx:Label text="Planificación de móviles"  fontWeight="bold" fontSize="22" id="label1"/>			
+			<mx:Label text="Turnos de móviles"  fontWeight="bold" fontSize="22" id="label1"/>			
 			<mx:Form borderStyle="solid" cornerRadius="15">
 				<mx:FormItem label="Periodo Programación" direction="horizontal" fontWeight="bold" id="formitem1">
 					<mx:NumericStepper id="anio_ns" change="fpershow()" value="2011" minimum="2011" maximum="2050" stepSize="1"/>
 					<mx:NumericStepper id="mes_ns" change="fpershow()" value="2" minimum="1" maximum="12" stepSize="1"/>
 				</mx:FormItem>
 			</mx:Form>
-			<mx:Button label="Personal" click="fmantpersonal()" id="button1" icon="@Embed(source='../../icons/people.png')" width="120"/>
-			<mx:Button label="Vehículos" click="fmantvehiculos()" id="button2" icon="@Embed(source='../../icons/truck.png')" width="120"/>
-			<mx:Button label="Móviles" click="fmantmoviles()" id="button3" icon="@Embed(source='../../icons/movil.png')" width="120"/>
+			<mx:Button label="Personal" click="fmantpersonal()" id="button1" icon="@Embed(source='../../icons/people.png')" width="110" height="30"/>
+			<mx:Button label="Vehículos" click="fmantvehiculos()" id="button2" icon="@Embed(source='../../icons/truck.png')" width="110" height="30"/>
+			<mx:Button label="Móviles" click="fmantmoviles()" id="button3" icon="@Embed(source='../../icons/movil.png')" width="110" height="30"/>
+			<mx:Label text="Programación->"  fontWeight="bold"/>
+			<mx:Button id="btedit"    click="fedit()" icon="@Embed(source='../../icons/Edit.png')" width="30" height="30"/>
+			<mx:Button id="btshow"    click="fshow()" icon="@Embed(source='../../icons/Search.png')" width="30" height="30"/>
+			<mx:Button id="btsave"    click="fsave()" icon="@Embed(source='../../icons/Save.png')" width="30" height="30"/>
 		</mx:HBox>
-		<mx:AdvancedDataGrid id="adg1" dataProvider="{jerarquia}" width="100%" height="100%" maxWidth="1280" selectionMode="singleCell" editable="false" horizontalScrollPolicy="on" verticalScrollPolicy="on">	
+		<mx:AdvancedDataGrid id="adg1" dataProvider="{jerarquia}" selectionMode="singleCell" selectable="true" editable="false" width="100%" height="100%" maxWidth="1280" horizontalScrollPolicy="on" verticalScrollPolicy="on">	
 	        <mx:columns>
 	            <mx:AdvancedDataGridColumn id="cuentas" dataField="nombre" headerText="Cuenta" width="250"/>
 	        </mx:columns>
@@ -152,5 +175,6 @@
 	<mx:NumberFormatter id="nf" precision="0" useThousandsSeparator="true" />
 
 	<mx:HTTPService id="getturnos" url="../turnos.xml" method="GET" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="saveturnos" url="../turnos/saveturnos.xml" method="GET" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
     
 </mx:Canvas>

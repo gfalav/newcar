@@ -1,12 +1,31 @@
+require 'rexml/document'
 require 'builder'
 
 class TurnosController < ApplicationController
+
+  def saveturnos
+  
+    doc = REXML::Document.new(params[:jerarquia])
+    doc.elements.each('turnos/turno/turno') {|d|
+      debugger  
+      puts d.attributes['f21']
+    }
+
+    fini = Date.new(params[:anio].to_i,params[:mes].to_i,1)
+    ffin = fini.next_month-1
+
+    cadena = getturnos(fini,ffin)
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml  { render :xml => cadena }
+    end    
+  end
+
   # GET /turnos
   # GET /turnos.xml
   def index
     @turnos = Turno.all
-    params[:anio]=2011
-    params[:mes]=2
     
     fini = Date.new(params[:anio].to_i,params[:mes].to_i,1)
     ffin = fini.next_month-1
@@ -44,7 +63,7 @@ class TurnosController < ApplicationController
             a << 0
             a << 0
             a << 0
-            x.turno(:nombre=>m.nombre,:ofcar_id=>o.id,:ofcar=>o.oficina,:f1=>a[1],:f2=>a[2],:f3=>a[3],:f4=>a[4],:f5=>a[5],:f6=>a[6],:f7=>a[7],:f8=>a[8],:f9=>a[9],:f10=>a[10],:f11=>a[11],:f12=>a[12],:f13=>a[13],:f14=>a[14],:f15=>a[15],:f16=>a[16],:f17=>a[17],:f18=>a[18],:f19=>a[19],:f20=>a[20],:f21=>a[21],:f22=>a[22],:f23=>a[23],:f24=>a[24],:f25=>a[25],:f26=>a[26],:f27=>a[27],:f28=>a[28],:f29=>a[29],:f30=>a[30],:f31=>a[31])
+            x.turno(:movil=>m.id,:nombre=>m.nombre,:ofcar_id=>o.id,:ofcar=>o.oficina,:f1=>a[1],:f2=>a[2],:f3=>a[3],:f4=>a[4],:f5=>a[5],:f6=>a[6],:f7=>a[7],:f8=>a[8],:f9=>a[9],:f10=>a[10],:f11=>a[11],:f12=>a[12],:f13=>a[13],:f14=>a[14],:f15=>a[15],:f16=>a[16],:f17=>a[17],:f18=>a[18],:f19=>a[19],:f20=>a[20],:f21=>a[21],:f22=>a[22],:f23=>a[23],:f24=>a[24],:f25=>a[25],:f26=>a[26],:f27=>a[27],:f28=>a[28],:f29=>a[29],:f30=>a[30],:f31=>a[31])
           }
         }
       }
