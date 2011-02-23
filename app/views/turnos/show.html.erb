@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Fturno:</b>
+  <%= @turno.fturno %>
+</p>
+
+<p>
+  <b>Turno:</b>
+  <%= @turno.turno %>
+</p>
+
+<p>
+  <b>Ofcar:</b>
+  <%= @turno.ofcar_id %>
+</p>
+
+<p>
+  <b>Movil:</b>
+  <%= @turno.movil_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_turno_path(@turno) %> |
+<%= link_to 'Back', turnos_path %>

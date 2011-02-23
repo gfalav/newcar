@@ -37,10 +37,27 @@
 
 	<mx:Script>
 		<![CDATA[
+			import mx.collections.HierarchicalData;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.controls.Alert;
 			import Events.ActionEvent;
 			import mx.collections.ArrayCollection;
 			
+			private var listaxml:XMLList = new XMLList;
+			[Bindable] private var jerarquia:HierarchicalData = new HierarchicalData;
+
+			private function fgetturnos(event:ResultEvent):void{
+				listaxml = new XMLList(event.result);
+				jerarquia = new HierarchicalData(listaxml);
+			}
+			
 			public function finit():void{
+				jerarquia = new HierarchicalData;
+				var o:Object = new Object;
+				o.anio = anio_ns.value;
+				o.mes = mes_ns.value;
+				getturnos.send(o);
 				vistamensual();
 			}
 
@@ -74,27 +91,27 @@
 				var arrcols:ArrayCollection = new ArrayCollection;
 				var n:Number;
 				var dgcab:AdvancedDataGridColumn = new AdvancedDataGridColumn;
-				dgcab.headerText = 'Cuentas';
-				dgcab.dataField = '@cuenta';
+				dgcab.headerText = 'Móviles';
+				dgcab.dataField = '@nombre';
 				dgcab.width = 250;
 				arrcols.addItem(dgcab);
 				dgcab = new AdvancedDataGridColumn;
-				dgcab.headerText = 'Total';
-				dgcab.dataField = '@hscar';
-				dgcab.formatter = nf;
-				dgcab.width = 80;
-				arrcols.addItem(dgcab);
 				for (n=1; n<32; n++){
 					var dg:AdvancedDataGridColumn = new AdvancedDataGridColumn;
 					dg.headerText = n.toString();
-					dg.dataField = "@m"+n.toString();
+					dg.dataField = "@f"+n.toString();
+					dg.setStyle('textAlign','center');
 					dg.formatter = nf;
 					dg.width=50;
+					
 					arrcols.addItemAt(dg,n);
 				}
 				adg1.columns = arrcols.toArray();
 			}
 			
+			private function ffault(event:FaultEvent):void{
+				Alert.show(event.fault.faultString,'Error: RPC services Call');
+			}
 		]]>
 	</mx:Script>		
 	
@@ -115,10 +132,9 @@
 			<mx:Button label="Vehículos" click="fmantvehiculos()" id="button2" icon="@Embed(source='../../icons/truck.png')" width="120"/>
 			<mx:Button label="Móviles" click="fmantmoviles()" id="button3" icon="@Embed(source='../../icons/movil.png')" width="120"/>
 		</mx:HBox>
-		<mx:AdvancedDataGrid id="adg1" width="100%" height="100%" maxWidth="1280" selectionMode="singleCell" editable="false" horizontalScrollPolicy="on" verticalScrollPolicy="on">	
+		<mx:AdvancedDataGrid id="adg1" dataProvider="{jerarquia}" width="100%" height="100%" maxWidth="1280" selectionMode="singleCell" editable="false" horizontalScrollPolicy="on" verticalScrollPolicy="on">	
 	        <mx:columns>
-	            <mx:AdvancedDataGridColumn id="cuentas" dataField="" headerText="Cuenta" width="250"/>
-	            <mx:AdvancedDataGridColumn id="total" dataField="" headerText="Total" width="80"/>
+	            <mx:AdvancedDataGridColumn id="cuentas" dataField="nombre" headerText="Cuenta" width="250"/>
 	        </mx:columns>
 	    </mx:AdvancedDataGrid>
 	</mx:VBox>	
@@ -133,6 +149,8 @@
             </mx:Parallel>
         </mx:Transition>
     </mx:transitions>
-	<mx:NumberFormatter id="nf" precision="2" useThousandsSeparator="true" />
+	<mx:NumberFormatter id="nf" precision="0" useThousandsSeparator="true" />
+
+	<mx:HTTPService id="getturnos" url="../turnos.xml" method="GET" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
     
 </mx:Canvas>

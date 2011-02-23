@@ -1,0 +1,9 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  turno: 1
+  desc: MyString
+
+two:
+  turno: 1
+  desc: MyString

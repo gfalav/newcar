@@ -1,0 +1,33 @@
+<%= form_for(@turno) do |f| %>
+  <% if @turno.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@turno.errors.count, "error") %> prohibited this turno from being saved:</h2>
+
+      <ul>
+      <% @turno.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :fturno %><br />
+    <%= f.date_select :fturno %>
+  </div>
+  <div class="field">
+    <%= f.label :turno_id %><br />
+    <%= f.text_field :turno_id %>
+  </div>
+  <div class="field">
+    <%= f.label :ofcar_id %><br />
+    <%= f.text_field :ofcar_id %>
+  </div>
+  <div class="field">
+    <%= f.label :movil_id %><br />
+    <%= f.text_field :movil_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

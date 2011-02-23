@@ -1,0 +1,29 @@
+<h1>Listing turnos</h1>
+
+<table>
+  <tr>
+    <th>Fturno</th>
+    <th>Turno</th>
+    <th>Ofcar</th>
+    <th>Movil</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @turnos.each do |turno| %>
+  <tr>
+    <td><%= turno.fturno %></td>
+    <td><%= turno.turno_id %></td>
+    <td><%= turno.ofcar_id %></td>
+    <td><%= turno.movil_id %></td>
+    <td><%= link_to 'Show', turno %></td>
+    <td><%= link_to 'Edit', edit_turno_path(turno) %></td>
+    <td><%= link_to 'Destroy', turno, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Turno', new_turno_path %>

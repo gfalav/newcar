@@ -1,4 +1,8 @@
 Newcar::Application.routes.draw do
+  resources :tturnos
+
+  resources :turnos
+
   resources :ofcars
 
   resources :movils do

@@ -42,6 +42,7 @@
 			
 			public function finit():void{
 				vistaanual();
+				jerarquia = new HierarchicalData;
 				var o:Object = new Object;
 				o.anio = anio_ns.value;
 				o.mes = mes_ns.value;

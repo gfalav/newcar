@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  fturno: 2011-02-23
+  turno: 1
+  ofcar_id: 1
+  movil_id: 1
+
+two:
+  fturno: 2011-02-23
+  turno: 1
+  ofcar_id: 1
+  movil_id: 1
