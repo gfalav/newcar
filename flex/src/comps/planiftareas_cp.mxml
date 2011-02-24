@@ -46,7 +46,7 @@
 				var o:Object = new Object;
 				o.anio = anio_ns.value;
 				o.mes = mes_ns.value;
-				getactividadsmes.send(o);
+				actividades_ro.indexcuentasactividadmes.send(o);
 			}
 
 			private function fpershow():void{
@@ -55,14 +55,14 @@
 					case 'Anual':
 						o.anio = anio_ns.value;
 						o.mes = mes_ns.value;
-						getactividadsmes.send(o);
+						actividades_ro.indexcuentasactividadmes.send(o);
 						jerarquia = new HierarchicalData;
 						vistaanual();
 						break;
 					case 'Mensual':
 						o.anio = anio_ns.value;
 						o.mes = mes_ns.value;
-						getactividadsdia.send(o);
+						actividades_ro.indexcuentasactividaddia.send(o);
 						jerarquia = new HierarchicalData;
 						vistamensual();
 						break;
@@ -202,7 +202,9 @@
     </mx:transitions>
 
 	<mx:NumberFormatter id="nf" precision="2" useThousandsSeparator="true" />
-	<mx:HTTPService id="getactividadsmes" url="../actividads/indexcuentasactividadmes.xml" method="GET" resultFormat="xml" result="fgetactividads(event)" fault="ffault(event)" showBusyCursor="true"/>	
-	<mx:HTTPService id="getactividadsdia" url="../actividads/indexcuentasactividaddia.xml" method="GET" resultFormat="xml" result="fgetactividads(event)" fault="ffault(event)" showBusyCursor="true"/>	
+	<mx:RemoteObject id="actividades_ro" destination="rubyamf" source="ActividadsController" showBusyCursor="true" fault="ffault(event)">
+		<mx:method name="indexcuentasactividadmes" result="fgetactividads(event)"/>
+		<mx:method name="indexcuentasactividaddia" result="fgetactividads(event)"/>
+	</mx:RemoteObject>
 	
 </mx:Canvas>

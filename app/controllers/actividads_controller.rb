@@ -6,51 +6,56 @@ class ActividadsController < ApplicationController
     debugger
     case params[:accion]
       when 'Agrega'
-        fechas = params[:fechas].split(',')
-        if (params[:metfecha]!='rf')
+        fechas = params[0][:fechas].split(',')
+        if (params[0][:metfecha]!='rf')
           fechas.each {|a|
             actividad = Actividad.new
-            actividad.cuenta_id = params[:cuenta_id].to_i
-            actividad.descripcion = params[:descripcion]
+            actividad.cuenta_id = params[0][:cuenta_id]
+            actividad.descripcion = params[0][:descripcion]
             actividad.factividad = a
-            actividad.hscar = params[:hscar].to_i
+            actividad.hscar = params[0][:hscar]
             actividad.save
           }
         else
           fechas[0]..fechas[1].each {|a|
             actividad = Actividad.new
-            actividad.cuenta_id = params[:cuenta_id].to_i
-            actividad.descripcion = params[:descripcion]
+            actividad.cuenta_id = params[0][:cuenta_id]
+            actividad.descripcion = params[0][:descripcion]
             actividad.factividad = a
-            actividad.hscar = params[:hscar].to_i
+            actividad.hscar = params[0][:hscar]
             actividad.save
           }
         end
       when 'Edita'
-        actividad = Actividad.find(params[:id].to_i)
-        actividad.cuenta_id = params[:cuenta_id].to_i
-        actividad.descripcion = params[:descripcion]
-        actividad.factividad = params[:fechas]
-        actividad.hscar = params[:hscar].to_i
+        actividad = Actividad.find(params[0][:id])
+        actividad.cuenta_id = params[0][:cuenta_id]
+        actividad.descripcion = params[0][:descripcion]
+        actividad.factividad = params[0][:fechas]
+        actividad.hscar = params[0][:hscar]
         actividad.save
       when 'Borra'
-        actividad = Actividad.find(params[:id])
+        actividad = Actividad.find(params[0][:id])
         actividad.destroy
     end
-    @cadena = getactividades(params[:cuenta_id])
+    @cadena = getactividades(params[0][:cuenta_id])
     
-    render :xml => @cadena
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml  { render :xml => cadena }
+      format.amf  { render :amf => cadena }
+    end
 
   end
   
   # GET /actividads
   # GET /actividads.xml
   def index
-    cadena = getactividades(params[:id])
+    cadena = getactividades(params[0][:id])
     
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => cadena }
+      format.amf  { render :amf => cadena }
     end
   end
 
@@ -58,7 +63,7 @@ class ActividadsController < ApplicationController
     indexs = Array.new
     activarr = Array.new
 
-    indexs = Cuenta.find(params[:id]).descendant_ids << params[:id]
+    indexs = Cuenta.find(params[0][:id]).descendant_ids << params[0][:id]
 
     @actividads = Actividad.where(:cuenta_id=>indexs)
 
@@ -76,11 +81,13 @@ class ActividadsController < ApplicationController
   end
 
   def indexcuentasactividadmes
+  
     cadena = getcuentasactivmesxml(params)
 
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => cadena }
+      format.amf  { render :amf => cadena }
     end
   end
 
@@ -90,7 +97,7 @@ class ActividadsController < ApplicationController
     x.instruct!
 
     c = Cuenta.find(1)
-    a = Date.new(params[:anio].to_i,1,1)
+    a = Date.new(params[0][:anio],1,1)
     b = a.next_year-1
     m = Actividad.group('extract(month from factividad)').where(:cuenta_id=>c.descendant_ids << c.id,:factividad=>(a..b)).sum(:hscar)
     x.cuenta(:id=>c.id,:nombre=>c.nombre,:ancestry=>c.ancestry,:m1=>m['1'],:m2=>m['2'],:m3=>m['3'],:m4=>m['4'],:m5=>m['5'],:m6=>m['6'],:m7=>m['7'],:m8=>m['8'],:m9=>m['9'],:m10=>m['10'],:m11=>m['11'],:m12=>m['12'],:hscar=>Actividad.where(:cuenta_id=>c.descendant_ids << c.id).sum(:hscar)) do
@@ -102,7 +109,7 @@ class ActividadsController < ApplicationController
 
   def gethijosmes(cuenta,x)
     cuenta.children.each {|c|
-    a = Date.new(params[:anio].to_i,1,1)
+    a = Date.new(params[0][:anio],1,1)
     b = a.next_year-1
     m = Actividad.group('extract(month from factividad)').where(:cuenta_id=>c.descendant_ids << c.id,:factividad=>(a..b)).sum(:hscar)
       x.cuenta(:id=>c.id,:nombre=>c.nombre,:ancestry=>c.ancestry,:m1=>m['1'],:m2=>m['2'],:m3=>m['3'],:m4=>m['4'],:m5=>m['5'],:m6=>m['6'],:m7=>m['7'],:m8=>m['8'],:m9=>m['9'],:m10=>m['10'],:m11=>m['11'],:m12=>m['12'],:hscar=>Actividad.where(:cuenta_id=>c.descendant_ids << c.id).sum(:hscar)) do
@@ -117,6 +124,7 @@ class ActividadsController < ApplicationController
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => cadena }
+      format.amf  { render :amf => cadena }
     end
   end
 
@@ -127,7 +135,7 @@ class ActividadsController < ApplicationController
 
     c = Cuenta.find(1)
     
-    a = Date.new(params[:anio].to_i,params[:mes].to_i,1)
+    a = Date.new(params[0][:anio],params[0][:mes],1)
     b = a.next_month-1    
     m = Actividad.group('extract(day from factividad)').where(:cuenta_id=>c.descendant_ids << c.id,:factividad=>(a..b)).sum(:hscar)
     x.cuenta(:id=>c.id,:nombre=>c.nombre,:ancestry=>c.ancestry,:m1=>m['1'],:m2=>m['2'],:m3=>m['3'],:m4=>m['4'],:m5=>m['5'],:m6=>m['6'],:m7=>m['7'],:m8=>m['8'],:m9=>m['9'],:m10=>m['10'],:m11=>m['11'],:m12=>m['12'],:m13=>m['13'],:m14=>m['14'],:m15=>m['15'],:m16=>m['16'],:m17=>m['17'],:m18=>m['18'],:m19=>m['19'],:m20=>m['20'],:m21=>m['21'],:m22=>m['22'],:m23=>m['23'],:m24=>m['24'],:m25=>m['25'],:m26=>m['26'],:m27=>m['27'],:m28=>m['28'],:m29=>m['29'],:m30=>m['30'],:m31=>m['31'],:hscar=>Actividad.where(:cuenta_id=>c.descendant_ids << c.id).sum(:hscar)) do
@@ -139,7 +147,7 @@ class ActividadsController < ApplicationController
 
   def gethijosdia(cuenta,x)
     cuenta.children.each {|c|
-    a = Date.new(params[:anio].to_i,params[:mes].to_i,1)
+    a = Date.new(params[0][:anio],params[0][:mes],1)
     b = a.next_month-1    
     m = Actividad.group('extract(day from factividad)').where(:cuenta_id=>c.descendant_ids << c.id,:factividad=>(a..b)).sum(:hscar)
     x.cuenta(:id=>c.id,:nombre=>c.nombre,:ancestry=>c.ancestry,:m1=>m['1'],:m2=>m['2'],:m3=>m['3'],:m4=>m['4'],:m5=>m['5'],:m6=>m['6'],:m7=>m['7'],:m8=>m['8'],:m9=>m['9'],:m10=>m['10'],:m11=>m['11'],:m12=>m['12'],:m13=>m['13'],:m14=>m['14'],:m15=>m['15'],:m16=>m['16'],:m17=>m['17'],:m18=>m['18'],:m19=>m['19'],:m20=>m['20'],:m21=>m['21'],:m22=>m['22'],:m23=>m['23'],:m24=>m['24'],:m25=>m['25'],:m26=>m['26'],:m27=>m['27'],:m28=>m['28'],:m29=>m['29'],:m30=>m['30'],:m31=>m['31'],:hscar=>Actividad.where(:cuenta_id=>c.descendant_ids << c.id).sum(:hscar)) do

@@ -6,7 +6,8 @@ gem 'pg'
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 gem 'ancestry'
-
+gem 'RocketAMF', :git => 'git://github.com/warhammerkid/rocket-amf.git'
+gem 'rails3-amf', :git => 'git://github.com/warhammerkid/rails3-amf.git'
 # Use unicorn as the web server
 # gem 'unicorn'
 

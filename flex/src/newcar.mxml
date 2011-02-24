@@ -3,7 +3,7 @@
 	backgroundGradientAlphas="[1.0, 1.0]" backgroundGradientColors="[#FFFFFF, #FFFFFF]"
 	 currentState="Inicial" width="1200" height="760">
 	 
-	 
+	
 	<mx:states>
 		<mx:State name="Inicial">
 			<mx:RemoveChild target="{tn1}"/>
