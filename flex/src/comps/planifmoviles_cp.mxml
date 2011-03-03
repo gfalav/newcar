@@ -57,7 +57,7 @@
 				var o:Object = new Object;
 				o.anio = anio_ns.value;
 				o.mes = mes_ns.value;
-				turnos_ro.index.send(o);
+				getturnos.send(o);
 				vistamensual();
 			}
 
@@ -80,7 +80,7 @@
 				o.jerarquia = jerarquia.source.toString();
 				o.anio = anio_ns.value;
 				o.mes = mes_ns.value;
-				turnos_ro.saveturnos.send(o);
+				saveturnos.send(o);
 			}
 			
 			private function fmantpersonal():void{
@@ -174,9 +174,8 @@
     </mx:transitions>
 	<mx:NumberFormatter id="nf" precision="0" useThousandsSeparator="true" />
 
-	<mx:RemoteObject id="turnos_ro" destination="rubyamf" source="TurnosController" showBusyCursor="true" fault="ffault(event)">
-		<mx:method name="saveturnos" result="fgetturnos(event)"/>
-		<mx:method name="index"      result="fgetturnos(event)"/>
-	</mx:RemoteObject>
+
+	<mx:HTTPService id="getturnos" url="../turnos.xml" method="GET" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="saveturnos" url="../turnos/saveturnos.xml" method="GET" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
     
 </mx:Canvas>

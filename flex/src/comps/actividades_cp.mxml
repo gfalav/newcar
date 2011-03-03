@@ -64,7 +64,7 @@
 			}
 			
 			private function findex():void{
-				actividades_ro.index.send(cuenta);
+				getactividades.send(cuenta);
 				this.currentState = 'index';
 			}
 			
@@ -118,7 +118,7 @@
 						o.metfecha = 'uf';
 						break;
 				}
-				actividades_ro.addactividad.send(o);
+				addactividad.send(o);
 				this.currentState = 'index';
 			}
 			
@@ -296,9 +296,7 @@
 		</mx:HBox>
 	</mx:VBox>
 
-	<mx:RemoteObject id="actividades_ro" destination="rubyamf" source="ActividadsController" showBusyCursor="true" fault="ffault(event)">
-		<mx:method name="index" result="fgetactividads(event)"/>
-		<mx:method name="addactividad" result="fgetactividads(event)"/>
-	</mx:RemoteObject>
+	<mx:HTTPService id="getactividades" url="../actividads.xml" method="GET" resultFormat="xml" result="fgetactividads(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="addactividad" url="../actividads/addactividad.xml" method="GET" resultFormat="xml" result="fgetactividads(event)" fault="ffault(event)" showBusyCursor="true"/>
 	<mx:DateFormatter id="df" formatString="DD/MM/YYYY" />
 </mx:Canvas>
