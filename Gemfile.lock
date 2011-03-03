@@ -1,15 +1,3 @@
-GIT
-  remote: git://github.com/warhammerkid/rails3-amf.git
-  revision: 63ce5642b310a5a36c543dc2f4e7b5250af56eb5
-  specs:
-    rails3-amf (0.1.0)
-
-GIT
-  remote: git://github.com/warhammerkid/rocket-amf.git
-  revision: aecb8ce8b54e822bb594a53371801b446ecb26af
-  specs:
-    RocketAMF (0.2.1)
-
 GEM
   remote: http://rubygems.org/
   specs:
@@ -97,9 +85,7 @@ PLATFORMS
   x86-mingw32
 
 DEPENDENCIES
-  RocketAMF!
   ancestry
   pg
   rails (= 3.0.3)
-  rails3-amf!
   ruby-debug19

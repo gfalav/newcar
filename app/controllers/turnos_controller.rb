@@ -26,8 +26,22 @@ class TurnosController < ApplicationController
     x = Builder::XmlMarkup.new(:target => cadena, :indent => 1)
     x.instruct!
     x.turnos{
-      (fini..ffin).each {|f|
-        
+      Movil.all.each {|m|
+        x.movil(:id=>m.id,:nombre=>m.nombre){
+          (fini..ffin).each {|f|
+            turno = Turno.where(:fturno=>f,:movil_id=>m.id).first
+            x.fecha f.day.to_s
+            if (turno != nil)
+              x.tturno turno.tturno
+              x.turno turno.tturno.desc
+              x.ofcar_id turno.ofcar_id
+            else
+              x.tturno '0'
+              x.turno 'S/A'
+              x.ofcar_id '0'
+            end
+          }
+        }
       }
     }  
     return cadena
