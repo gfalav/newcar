@@ -3,7 +3,6 @@ require 'builder'
 class MovilsController < ApplicationController
 
   def addmovil
-    debugger
     case params[:accion]
       when 'Agrega'
         movil = Movil.new

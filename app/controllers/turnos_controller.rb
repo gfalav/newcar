@@ -3,14 +3,22 @@ require 'builder'
 class TurnosController < ApplicationController
 
   def saveturnos
+    #fini = Date.new(params[:anio].to_i,params[:mes].to_i,1)
+    fini = Date.new(2011,2,1)
+    ffin = fini.next_month-1
+
+    cadena = getturnos(fini,ffin)
+
+    respond_to do |format|
+      format.html { render :xml => cadena }
+      format.xml  { render :xml => cadena }
+    end
   end
 
   # GET /turnos
   # GET /turnos.xml
   def index
-    @turnos = Turno.all
-    fini = Date.new(2011,2,1)
-    # fini = Date.new(params[0][:anio].to_i,params[0][:mes].to_i,1)
+    fini = Date.new(params[:anio].to_i,params[:mes].to_i,1)
     ffin = fini.next_month-1
 
     cadena = getturnos(fini,ffin)
@@ -25,21 +33,26 @@ class TurnosController < ApplicationController
     cadena = ''
     x = Builder::XmlMarkup.new(:target => cadena, :indent => 1)
     x.instruct!
-    x.turnos{
-      Movil.all.each {|m|
-        x.movil(:id=>m.id,:nombre=>m.nombre){
-          (fini..ffin).each {|f|
-            turno = Turno.where(:fturno=>f,:movil_id=>m.id).first
-            x.fecha f.day.to_s
-            if (turno != nil)
-              x.tturno turno.tturno
-              x.turno turno.tturno.desc
-              x.ofcar_id turno.ofcar_id
-            else
-              x.tturno '0'
-              x.turno 'S/A'
-              x.ofcar_id '0'
+    x.turnos(:nombre=>"Raiz"){
+      Ofcar.all.each {|o|
+        x.ofcars(:nombre=>o.oficina){
+          moviles = Movil.where(:ofcar_id=>o.id)
+          Turno.where(:ofcar_id=>o.id,:fturno=>(fini..ffin)).each {|tm|
+            if (tm.movil.ofcar_id != o.id)
+              moviles << tm.movil
             end
+          }
+          moviles.each {|m|
+            a = Array.new
+            (fini..ffin).each {|f|
+              turno = Turno.where(:movil_id=>m.id,:fturno=>f,:ofcar_id=>o.id).first
+              if (turno != nil)
+                a << turno.tturno.id
+              else
+                a << 0
+              end
+            }
+            x.turno(:nombre=>m.nombre,:f1=>a[0],:f2=>a[1],:f3=>a[2],:f4=>a[3],:f5=>a[4],:f6=>a[5],:f7=>a[6],:f8=>a[7],:f9=>a[8],:f10=>a[9],:f11=>a[10],:f12=>a[11],:f13=>a[12],:f14=>a[13],:f15=>a[14],:f16=>a[15],:f17=>a[16],:f18=>a[17],:f19=>a[18],:f20=>a[19],:f21=>a[20],:f22=>a[21],:f23=>a[22],:f24=>a[23],:f25=>a[24],:f26=>a[25],:f27=>a[26],:f28=>a[27],:f29=>a[28],:f30=>a[29],:f31=>a[30])
           }
         }
       }

@@ -77,10 +77,10 @@
 			
 			private function fsave():void{
 				var o:Object = new Object;
-				o.jerarquia = jerarquia.source.toString();
+				o.accion = 'agrega';
 				o.anio = anio_ns.value;
 				o.mes = mes_ns.value;
-				saveturnos.send(o);
+				addturno.send(o);
 			}
 			
 			private function fmantpersonal():void{
@@ -100,6 +100,7 @@
 
 			private function faction(event:ActionEvent):void{
 				if (event.accion =='Cancela'){
+					finit();
 					this.currentState = 'inicial';
 				}
 			}
@@ -175,7 +176,7 @@
 	<mx:NumberFormatter id="nf" precision="0" useThousandsSeparator="true" />
 
 
-	<mx:HTTPService id="getturnos" url="../turnos.xml" method="GET" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
-	<mx:HTTPService id="saveturnos" url="../turnos/saveturnos.xml" method="GET" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="getturnos"  url="../turnos.xml"            method="GET" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="addturno" url="../turnos/addturno"     method="GET" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
     
 </mx:Canvas>

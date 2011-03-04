@@ -3,10 +3,10 @@ Newcar::Application.routes.draw do
 
   resources :turnos do
     collection do
-      get 'saveturnos'
+      get 'addturnos'
     end
   end
-
+  
   resources :ofcars
 
   resources :movils do
