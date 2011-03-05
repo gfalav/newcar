@@ -14,7 +14,7 @@ class CreateTurnos < ActiveRecord::Migration
     Turno.create(:fturno=>'2011-02-17',:tturno_id=>1,:ofcar_id=>1,:movil_id=>1)
     Turno.create(:fturno=>'2011-02-18',:tturno_id=>1,:ofcar_id=>1,:movil_id=>1)
     Turno.create(:fturno=>'2011-02-19',:tturno_id=>1,:ofcar_id=>1,:movil_id=>1)
-    Turno.create(:fturno=>'2011-02-20',:tturno_id=>1,:ofcar_id=>1,:movil_id=>1)
+    Turno.create(:fturno=>'2011-02-20',:tturno_id=>1,:ofcar_id=>2,:movil_id=>1)
     Turno.create(:fturno=>'2011-02-21',:tturno_id=>1,:ofcar_id=>1,:movil_id=>1)
     Turno.create(:fturno=>'2011-02-22',:tturno_id=>1,:ofcar_id=>1,:movil_id=>1)
     Turno.create(:fturno=>'2011-02-23',:tturno_id=>1,:ofcar_id=>1,:movil_id=>1)

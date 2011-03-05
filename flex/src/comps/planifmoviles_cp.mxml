@@ -80,7 +80,10 @@
 				o.accion = 'agrega';
 				o.anio = anio_ns.value;
 				o.mes = mes_ns.value;
+				o.jerar = jerarquia.source;
+				addturno.method="POST";
 				addturno.send(o);
+				jerarquia = new HierarchicalData;
 			}
 			
 			private function fmantpersonal():void{
@@ -176,7 +179,7 @@
 	<mx:NumberFormatter id="nf" precision="0" useThousandsSeparator="true" />
 
 
-	<mx:HTTPService id="getturnos"  url="../turnos.xml"            method="GET" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
-	<mx:HTTPService id="addturno" url="../turnos/addturno"     method="GET" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="getturnos" url="../turnos.xml"          method="GET"  resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="addturno"  url="../turnos/addturno.xml" method="POST" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
     
 </mx:Canvas>

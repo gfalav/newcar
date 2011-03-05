@@ -2,9 +2,10 @@ require 'builder'
 
 class TurnosController < ApplicationController
 
-  def saveturnos
-    #fini = Date.new(params[:anio].to_i,params[:mes].to_i,1)
-    fini = Date.new(2011,2,1)
+  skip_before_filter :verify_authenticity_token, :only=>[:addturno]
+  
+  def addturno
+    fini = Date.new(params[:anio].to_i,params[:mes].to_i,1)
     ffin = fini.next_month-1
 
     cadena = getturnos(fini,ffin)

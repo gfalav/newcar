@@ -3,7 +3,7 @@ Newcar::Application.routes.draw do
 
   resources :turnos do
     collection do
-      get 'addturnos'
+      post 'addturno'
     end
   end
   
