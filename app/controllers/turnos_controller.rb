@@ -12,9 +12,17 @@ class TurnosController < ApplicationController
     debugger
     doc = REXML::Document.new params[:jerarquia]
     doc.elements.each('turnos/ofcars/turno') {|e|
-      puts e.attributes['nombre']
-      for n in 1..ffin.day
-        puts e.attributes['f'+n.to_s]
+      for n in fini.day..ffin.day
+        if (e.attributes['t'+n.to_s].to_i!=0)
+          turno = Turno.find(e.attributes['t'+n.to_s].to_i)
+        else
+          turno = Turno.new
+        end
+        turno.tturno_id = e.attributes['f'+n.to_s].to_i
+        turno.fturno = fini + n
+        turno.movil_id = e.attributes['movil_id'].to_i
+        turno.ofcar_id = Movil.find(e.attributes['movil_id'].to_i).ofcar_id
+        turno.save
       end
     }
 
@@ -29,7 +37,8 @@ class TurnosController < ApplicationController
   # GET /turnos
   # GET /turnos.xml
   def index
-    fini = Date.new(params[:anio].to_i,params[:mes].to_i,1)
+    fini = Date.new(2011,2,1)
+    #fini = Date.new(params[:anio].to_i,params[:mes].to_i,1)
     ffin = fini.next_month-1
 
     cadena = getturnos(fini,ffin)
@@ -55,15 +64,18 @@ class TurnosController < ApplicationController
           }
           moviles.each {|m|
             a = Array.new
+            b = Array.new
             (fini..ffin).each {|f|
               turno = Turno.where(:movil_id=>m.id,:fturno=>f,:ofcar_id=>o.id).first
               if (turno != nil)
                 a << turno.tturno.id
+                b << turno.id
               else
                 a << 0
+                b << 0
               end
             }
-            x.turno(:movil_id=>m.id,:nombre=>m.nombre,:f1=>a[0],:f2=>a[1],:f3=>a[2],:f4=>a[3],:f5=>a[4],:f6=>a[5],:f7=>a[6],:f8=>a[7],:f9=>a[8],:f10=>a[9],:f11=>a[10],:f12=>a[11],:f13=>a[12],:f14=>a[13],:f15=>a[14],:f16=>a[15],:f17=>a[16],:f18=>a[17],:f19=>a[18],:f20=>a[19],:f21=>a[20],:f22=>a[21],:f23=>a[22],:f24=>a[23],:f25=>a[24],:f26=>a[25],:f27=>a[26],:f28=>a[27],:f29=>a[28],:f30=>a[29],:f31=>a[30])
+            x.turno(:movil_id=>m.id,:nombre=>m.nombre,:f1=>a[0],:f2=>a[1],:f3=>a[2],:f4=>a[3],:f5=>a[4],:f6=>a[5],:f7=>a[6],:f8=>a[7],:f9=>a[8],:f10=>a[9],:f11=>a[10],:f12=>a[11],:f13=>a[12],:f14=>a[13],:f15=>a[14],:f16=>a[15],:f17=>a[16],:f18=>a[17],:f19=>a[18],:f20=>a[19],:f21=>a[20],:f22=>a[21],:f23=>a[22],:f24=>a[23],:f25=>a[24],:f26=>a[25],:f27=>a[26],:f28=>a[27],:f29=>a[28],:f30=>a[29],:f31=>a[30],:t1=>b[0],:t2=>b[1],:t3=>b[2],:t4=>b[3],:t5=>b[4],:t6=>b[5],:t7=>b[6],:t8=>b[7],:t9=>b[8],:t10=>b[9],:t11=>b[10],:t12=>b[11],:t13=>b[12],:t14=>b[13],:t15=>b[14],:t16=>b[15],:t17=>b[16],:t18=>b[17],:t19=>b[18],:t20=>b[19],:t21=>b[20],:t22=>b[21],:t23=>b[22],:t24=>b[23],:t25=>b[24],:t26=>b[25],:t27=>b[26],:t28=>b[27],:t29=>b[28],:t30=>b[29],:t31=>b[30])
           }
         }
       }
