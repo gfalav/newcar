@@ -1,4 +1,5 @@
 require 'builder'
+require "rexml/document"
 
 class TurnosController < ApplicationController
 
@@ -7,6 +8,15 @@ class TurnosController < ApplicationController
   def addturno
     fini = Date.new(params[:anio].to_i,params[:mes].to_i,1)
     ffin = fini.next_month-1
+
+    debugger
+    doc = REXML::Document.new params[:jerarquia]
+    doc.elements.each('turnos/ofcars/turno') {|e|
+      puts e.attributes['nombre']
+      for n in 1..ffin.day
+        puts e.attributes['f'+n.to_s]
+      end
+    }
 
     cadena = getturnos(fini,ffin)
 
@@ -53,7 +63,7 @@ class TurnosController < ApplicationController
                 a << 0
               end
             }
-            x.turno(:nombre=>m.nombre,:f1=>a[0],:f2=>a[1],:f3=>a[2],:f4=>a[3],:f5=>a[4],:f6=>a[5],:f7=>a[6],:f8=>a[7],:f9=>a[8],:f10=>a[9],:f11=>a[10],:f12=>a[11],:f13=>a[12],:f14=>a[13],:f15=>a[14],:f16=>a[15],:f17=>a[16],:f18=>a[17],:f19=>a[18],:f20=>a[19],:f21=>a[20],:f22=>a[21],:f23=>a[22],:f24=>a[23],:f25=>a[24],:f26=>a[25],:f27=>a[26],:f28=>a[27],:f29=>a[28],:f30=>a[29],:f31=>a[30])
+            x.turno(:movil_id=>m.id,:nombre=>m.nombre,:f1=>a[0],:f2=>a[1],:f3=>a[2],:f4=>a[3],:f5=>a[4],:f6=>a[5],:f7=>a[6],:f8=>a[7],:f9=>a[8],:f10=>a[9],:f11=>a[10],:f12=>a[11],:f13=>a[12],:f14=>a[13],:f15=>a[14],:f16=>a[15],:f17=>a[16],:f18=>a[17],:f19=>a[18],:f20=>a[19],:f21=>a[20],:f22=>a[21],:f23=>a[22],:f24=>a[23],:f25=>a[24],:f26=>a[25],:f27=>a[26],:f28=>a[27],:f29=>a[28],:f30=>a[29],:f31=>a[30])
           }
         }
       }

@@ -77,11 +77,9 @@
 			
 			private function fsave():void{
 				var o:Object = new Object;
-				o.accion = 'agrega';
 				o.anio = anio_ns.value;
 				o.mes = mes_ns.value;
-				o.jerar = jerarquia.source;
-				addturno.method="POST";
+				o.jerarquia = jerarquia.source;
 				addturno.send(o);
 				jerarquia = new HierarchicalData;
 			}
