@@ -7,6 +7,7 @@ class CreateTturnos < ActiveRecord::Migration
       t.timestamps
     end
     
+    Tturno.create(:turno=>0,:desc=>'Sin Asignar')
     Tturno.create(:turno=>1,:desc=>'de 08:00 a 16:00')
     Tturno.create(:turno=>2,:desc=>'de 16:00 a 24:00')
     Tturno.create(:turno=>3,:desc=>'de 24:00 a 08:00')
