@@ -3,7 +3,8 @@ Newcar::Application.routes.draw do
 
   resources :turnos do
     collection do
-      post 'addturno'
+      post 'saveallturnos'
+      post 'saveturno'
     end
   end
   

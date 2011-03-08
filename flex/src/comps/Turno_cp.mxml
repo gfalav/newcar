@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="finit()">
+
+	<mx:Script>
+		<![CDATA[
+			import Events.ActionEvent;
+			import mx.messaging.AbstractConsumer;
+			import mx.rpc.events.FaultEvent;
+			import vo.Ofcar;
+			import mx.collections.ArrayCollection;
+			import mx.rpc.events.ResultEvent;
+			import mx.controls.Alert;
+			import vo.Turno;
+			
+			[Bindable] private var turno:Turno;
+			[Bindable] private var ofcarsarr:ArrayCollection = new ArrayCollection;
+			
+			private function fsaveturno():void{
+				turno.ofcar_id = ofcarsarr.getItemAt(ofcar_cb.selectedIndex).id;
+				saveturno.send(turno);
+				dispatchEvent(new ActionEvent('Cierraturno'));
+			}
+			
+			public function setturno(turno:Turno):void{
+				this.turno = turno;
+				setofcar(turno.ofcar_id);
+			}
+			
+			private function finit():void{
+				getofcars.send();
+			} 
+			
+			private function fgetofcars(event:ResultEvent):void{
+				var x:XML = new XML(event.result);
+				ofcarsarr.removeAll();
+				ofcarsarr.addItem(new Ofcar(0,'Sel Of.Car'));
+				for each (var o:XML in x.ofcar){
+					ofcarsarr.addItem(new Ofcar(o.@id,o.@oficina));
+				}				
+			}
+			
+			private function setofcar(ofcar_id:Number):void{
+				var n:Number=0;
+				for each (var o:Ofcar in ofcarsarr){
+					if (o.id == ofcar_id){
+						ofcar_cb.selectedIndex = n;
+					} else {
+						n+=1;
+					}
+				}
+			}
+			
+			private function ffault(event:FaultEvent):void{
+				Alert.show(event.fault.faultString,'Error: RPC services Call');
+			}
+		]]>
+	</mx:Script>
+	<mx:Form x="10" y="10">
+		<mx:FormItem label="Movil">
+			<mx:TextInput id="movil_txt" text="{turno.movil}" width="200" editable="false"/>
+		</mx:FormItem>
+		<mx:FormItem label="Turno">
+			<mx:TextInput id="tturno_txt" text="{turno.tturno}" width="200"/>
+		</mx:FormItem>
+		<mx:FormItem label="F Turno">
+			<mx:DateField id="fturno_df" text="{turno.fturno}" formatString="DD/MM/YYYY" editable="false"/>
+		</mx:FormItem>
+		<mx:FormItem label="Of Car">
+			<mx:ComboBox id="ofcar_cb" dataProvider="{ofcarsarr}" labelField="oficina" width="200"></mx:ComboBox>
+		</mx:FormItem>
+		<mx:FormItem direction="horizontal">
+			<mx:Button label="Save" width="65" click="fsaveturno()"/>
+			<mx:Button label="Cancel" width="65" click="dispatchEvent(new ActionEvent('Cierraturno'));"/>
+		</mx:FormItem>
+	</mx:Form>
+	
+	<mx:HTTPService id="getofcars" url="../ofcars.xml" method="GET" resultFormat="xml" result="fgetofcars(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="saveturno"  url="../turnos/saveturno.xml" method="POST" resultFormat="xml" fault="ffault(event)" showBusyCursor="true"/>
+
+	<mx:Metadata>
+	    [Event(name="ActionEvent", type="Events.ActionEvent")]
+	</mx:Metadata>	
+
+</mx:Canvas>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" minHeight="500" 
-	xmlns:ns1="comps.*" currentState="inicial_edit" 
+	xmlns:ns1="comps.*" currentState="inicial_show" 
 	horizontalScrollPolicy="off" verticalScrollPolicy="off">
 
 	<mx:states>
@@ -10,33 +10,37 @@
 			<mx:RemoveChild target="{moviles_cp1}"/>
 		</mx:State>
 		<mx:State name="inicial_edit" basedOn="inicial">
-			<mx:RemoveChild target="{btshow}"/>			
+			<mx:RemoveChild target="{btedit}"/>			
+			<mx:RemoveChild target="{turno_cp1}"/>			
 		</mx:State>
-		<mx:State name="inicial_show" basedOn="inicial">
+		<mx:State name="inicial_turno" basedOn="inicial">
 			<mx:RemoveChild target="{btedit}"/>			
 		</mx:State>
+		<mx:State name="inicial_show" basedOn="inicial">
+			<mx:RemoveChild target="{btshow}"/>			
+			<mx:RemoveChild target="{turno_cp1}"/>
+		</mx:State>
 		<mx:State name="mantvehiculos">
-			<mx:RemoveChild target="{adg1}"/>
-			<mx:RemoveChild target="{hbox2}"/>
 			<mx:RemoveChild target="{personal_cp1}"/>
 			<mx:RemoveChild target="{moviles_cp1}"/>
+			<mx:RemoveChild target="{prog}"/>
 		</mx:State>
 		<mx:State name="mantpersonal">
 			<mx:RemoveChild target="{vehiculos_cp1}"/>
 			<mx:RemoveChild target="{moviles_cp1}"/>
-			<mx:RemoveChild target="{hbox2}"/>
-			<mx:RemoveChild target="{adg1}"/>
+			<mx:RemoveChild target="{prog}"/>
 		</mx:State>
 		<mx:State name="mantmoviles">
 			<mx:RemoveChild target="{vehiculos_cp1}"/>
 			<mx:RemoveChild target="{personal_cp1}"/>
-			<mx:RemoveChild target="{hbox2}"/>
-			<mx:RemoveChild target="{adg1}"/>
+			<mx:RemoveChild target="{prog}"/>
 		</mx:State>
 	</mx:states>
 
 	<mx:Script>
 		<![CDATA[
+			import mx.events.ListEvent;
+			import vo.Turno;
 			import mx.collections.HierarchicalData;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
@@ -45,7 +49,8 @@
 			import mx.collections.ArrayCollection;
 			
 			private var listaxml:XMLList = new XMLList;
-			[Bindable] private var jerarquia:HierarchicalData = new HierarchicalData;
+			[Bindable] public var jerarquia:HierarchicalData = new HierarchicalData;
+			public var turno:Turno;
 
 			private function fgetturnos(event:ResultEvent):void{
 				listaxml = new XMLList(event.result);
@@ -65,13 +70,28 @@
 				finit();
 			}
 
+			private function fchange(event:ListEvent):void{
+				turno = new Turno(event.itemRenderer.data.attribute('t'+Number(event.columnIndex).toString()),
+								  event.itemRenderer.data.attribute('f'+Number(event.columnIndex).toString()),
+								  new Date(anio_ns.value,mes_ns.value-1,event.columnIndex),
+								  event.itemRenderer.data.attribute('ofcar_id'),
+								  event.itemRenderer.data.attribute('movil_id'),
+								  event.itemRenderer.data.attribute('nombre')  );
+				
+			}
+			
+			private function fopts():void{
+				this.currentState="inicial_turno";
+				turno_cp1.setturno(turno);
+			}
+			
 			private function fedit():void{
-				this.currentState='inicial_show';
+				this.currentState='inicial_edit';
 				adg1.editable = 'true';
 			}
 			
 			private function fshow():void{
-				this.currentState='inicial_edit';
+				this.currentState='inicial_show';
 				adg1.editable = 'false';
 			}
 			
@@ -80,7 +100,7 @@
 				o.anio = anio_ns.value;
 				o.mes = mes_ns.value;
 				o.jerarquia = jerarquia.source;
-				addturno.send(o);
+				saveallturnos.send(o);
 				jerarquia = new HierarchicalData;
 			}
 			
@@ -100,9 +120,13 @@
 			}
 
 			private function faction(event:ActionEvent):void{
-				if (event.accion =='Cancela'){
-					finit();
-					this.currentState = 'inicial';
+				switch(event.accion) {
+					case 'Cancela':
+						finit();
+						break;
+					case 'Cierraturno':
+						finit();						
+						break;
 				}
 			}
 			
@@ -128,6 +152,7 @@
 					arrcols.addItemAt(dg,n);
 				}
 				adg1.columns = arrcols.toArray();
+				fshow();
 			}
 			
 			private function ffault(event:FaultEvent):void{
@@ -141,32 +166,40 @@
 		<ns1:personal_cp id="personal_cp1" ActionEvent="faction(event)" />
 		<ns1:vehiculos_cp id="vehiculos_cp1" ActionEvent="faction(event)" />
 		<ns1:moviles_cp id="moviles_cp1" ActionEvent="faction(event)" />
-		<mx:HBox verticalAlign="middle" id="hbox2">
-			<mx:Label text="Turnos de móviles"  fontWeight="bold" fontSize="22" id="label1"/>			
-			<mx:Form borderStyle="solid" cornerRadius="15">
-				<mx:FormItem label="Periodo Programación" direction="horizontal" fontWeight="bold" id="formitem1">
-					<mx:NumericStepper id="anio_ns" change="fpershow()" value="2011" minimum="2011" maximum="2050" stepSize="1"/>
-					<mx:NumericStepper id="mes_ns" change="fpershow()" value="2" minimum="1" maximum="12" stepSize="1"/>
-				</mx:FormItem>
-			</mx:Form>
-			<mx:Button label="Personal" click="fmantpersonal()" id="button1" icon="@Embed(source='../../icons/people.png')" width="110" height="30"/>
-			<mx:Button label="Vehículos" click="fmantvehiculos()" id="button2" icon="@Embed(source='../../icons/truck.png')" width="110" height="30"/>
-			<mx:Button label="Móviles" click="fmantmoviles()" id="button3" icon="@Embed(source='../../icons/movil.png')" width="110" height="30"/>
-			<mx:Label text="Programación->"  fontWeight="bold"/>
-			<mx:Button id="btedit"    click="fedit()" icon="@Embed(source='../../icons/Edit.png')" width="30" height="30"/>
-			<mx:Button id="btshow"    click="fshow()" icon="@Embed(source='../../icons/Search.png')" width="30" height="30"/>
-			<mx:Button id="btsave"    click="fsave()" icon="@Embed(source='../../icons/Save.png')" width="30" height="30"/>
-		</mx:HBox>
-		<mx:AdvancedDataGrid id="adg1" dataProvider="{jerarquia}" selectionMode="singleCell" selectable="true" editable="false" width="100%" height="100%" maxWidth="1280" horizontalScrollPolicy="on" verticalScrollPolicy="on">	
-	        <mx:columns>
-	            <mx:AdvancedDataGridColumn id="cuentas" dataField="nombre" headerText="Cuenta" width="250"/>
-	        </mx:columns>
-	    </mx:AdvancedDataGrid>
+		<mx:VBox id="prog" height="100%" width="100%">
+			<mx:HBox verticalAlign="middle" id="hbox2">
+				<mx:Label text="Turnos de móviles"  fontWeight="bold" fontSize="22" id="label1"/>			
+				<mx:Form borderStyle="solid" cornerRadius="15">
+					<mx:FormItem label="Periodo Programación" direction="horizontal" fontWeight="bold" id="formitem1">
+						<mx:NumericStepper id="anio_ns" change="fpershow()" value="2011" minimum="2011" maximum="2050" stepSize="1"/>
+						<mx:NumericStepper id="mes_ns" change="fpershow()" value="2" minimum="1" maximum="12" stepSize="1"/>
+					</mx:FormItem>
+				</mx:Form>
+				<mx:Button label="Personal" click="fmantpersonal()" id="button1" icon="@Embed(source='../../icons/people.png')" width="110" height="30"/>
+				<mx:Button label="Vehículos" click="fmantvehiculos()" id="button2" icon="@Embed(source='../../icons/truck.png')" width="110" height="30"/>
+				<mx:Button label="Móviles" click="fmantmoviles()" id="button3" icon="@Embed(source='../../icons/movil.png')" width="110" height="30"/>
+			</mx:HBox>
+			<mx:HBox height="100%" width="100%">
+				<mx:VBox>
+					<mx:Button id="btedit"    click="fedit()" icon="@Embed(source='../../icons/Edit.png')" width="30" height="30"/>
+					<mx:Button id="btshow"    click="fshow()" icon="@Embed(source='../../icons/Search.png')" width="30" height="30"/>
+					<mx:Button id="btsave"    click="fsave()" icon="@Embed(source='../../icons/Save.png')" width="30" height="30"/>
+					<mx:Button id="btopts"    click="fopts()" icon="@Embed(source='../../icons/Options.png')" width="30" height="30"/>
+				</mx:VBox>
+				<ns1:Turno_cp id="turno_cp1" ActionEvent="faction(event)">
+				</ns1:Turno_cp>
+				<mx:AdvancedDataGrid id="adg1" dataProvider="{jerarquia}" selectionMode="singleCell" selectable="true" editable="false" width="100%" height="100%" maxWidth="1280" horizontalScrollPolicy="on" verticalScrollPolicy="on" change="fchange(event)">	
+			        <mx:columns>
+			            <mx:AdvancedDataGridColumn id="cuentas" dataField="nombre" headerText="Cuenta" width="250"/>
+			        </mx:columns>
+			    </mx:AdvancedDataGrid>
+			</mx:HBox>
+		</mx:VBox>
 	</mx:VBox>	
 
 	<mx:transitions>
         <mx:Transition id="myTransition" fromState="*" toState="*">
-            <mx:Parallel id="t1" targets="{[adg1]}">
+            <mx:Parallel id="t1" targets="{[prog,personal_cp1,vehiculos_cp1,moviles_cp1,btshow,btedit,turno_cp1]}">
                 <!-- Define a Move and Resize effect.-->
                 <mx:Move  duration="800"/>
                 <mx:Resize duration="800"/>
@@ -178,6 +211,6 @@
 
 
 	<mx:HTTPService id="getturnos" url="../turnos.xml"          method="GET"  resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
-	<mx:HTTPService id="addturno"  url="../turnos/addturno.xml" method="POST" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
+	<mx:HTTPService id="saveallturnos"  url="../turnos/saveallturnos.xml" method="POST" resultFormat="xml" result="fgetturnos(event)" fault="ffault(event)" showBusyCursor="true"/>
     
 </mx:Canvas>

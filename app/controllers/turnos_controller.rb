@@ -3,9 +3,29 @@ require "rexml/document"
 
 class TurnosController < ApplicationController
 
-  skip_before_filter :verify_authenticity_token, :only=>[:addturno]
+  skip_before_filter :verify_authenticity_token, :only=>[:saveallturnos,:saveturno]
   
-  def addturno
+  def saveturno
+    if (params[:id].to_i==0)
+      turno = Turno.new
+    else
+      turno = Turno.find(params[:id].to_i)
+    end
+    
+    turno.fturno = params[:fturno]
+    turno.tturno_id = Tturno.where(:turno=>params[:tturno].to_i).first.id
+    turno.ofcar_id = params[:ofcar_id].to_i
+    turno.movil_id = params[:movil_id].to_i
+    turno.save
+  
+    cadena = 'ok'
+    respond_to do |format|
+      format.html { render :xml => cadena }
+      format.xml  { render :xml => cadena }
+    end
+  end
+  
+  def saveallturnos
     fini = Date.new(params[:anio].to_i,params[:mes].to_i,1)
     ffin = fini.next_month-1
 
@@ -24,6 +44,11 @@ class TurnosController < ApplicationController
             turno.movil_id = e.attributes['movil_id'].to_i
             turno.ofcar_id = e.attributes['ofcar_id'].to_i
             turno.save
+        else
+          turno = Turno.where(:id=>e.attributes['t'+n.to_s].to_i).first
+          if (turno != nil)
+            turno.destroy
+          end
         end
       end
     }
